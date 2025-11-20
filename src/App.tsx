@@ -7,8 +7,10 @@ const Icon: React.FC<{ className: string }> = ({ className }) => {
 };
 
 // --- Konfigurasi API (DISESUAIKAN UNTUK RAILWAY/VERCEL) ---
-// Gunakan Environment Variable VITE_APP_API_URL. Nilai default (fallback) adalah URL lokal.
-const API_URL = import.meta.env.VITE_APP_API_URL || 'http://127.0.0.1:5000/api';
+// Key Vercel: VITE_APP_API_URL
+// Value Vercel: https://punto-backend-production.up.railway.app
+// URL Fallback diubah menjadi root path tanpa /api
+const API_URL = import.meta.env.VITE_APP_API_URL || 'http://127.0.0.1:5000';
 const colorClasses = ['color-red', 'color-green', 'color-blue', 'color-yellow'];
 
 // --- Interfaces Frontend (Mencerminkan Output JSON dari Python) ---
@@ -189,7 +191,7 @@ const PuntoGame: React.FC = () => {
         setGameState('playing');
         
         try {
-            // Menggunakan API_URL yang sudah disetel ke Environment Variable
+            // Panggilan API menggunakan API_URL (root path)
             const response = await fetch(`${API_URL}/start_game`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -206,8 +208,8 @@ const PuntoGame: React.FC = () => {
             
         } catch (error) {
             console.error("Gagal memulai game:", error);
-            // Pesan error diubah agar lebih umum
-            alert(`Gagal terhubung ke backend API di ${API_URL}. Pastikan Environment Variable VITE_APP_API_URL sudah benar.`);
+            // Pesan error diubah agar sesuai dengan konfigurasi root baru
+            alert(`Gagal terhubung ke backend API di ${API_URL}. Pastikan Environment Variable VITE_APP_API_URL sudah benar dan tidak menggunakan /api.`);
             setGameState('menu'); 
         } finally {
             setIsThinking(false);
@@ -219,7 +221,7 @@ const PuntoGame: React.FC = () => {
 
         setIsThinking(true);
         try {
-            // Menggunakan API_URL yang sudah disetel ke Environment Variable
+            // Panggilan API menggunakan API_URL (root path)
             const response = await fetch(`${API_URL}/make_move`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -255,7 +257,7 @@ const PuntoGame: React.FC = () => {
         
         setIsThinking(true);
         try {
-            // Menggunakan API_URL yang sudah disetel ke Environment Variable
+            // Panggilan API menggunakan API_URL (root path)
             const response = await fetch(`${API_URL}/ai_move`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

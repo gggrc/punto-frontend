@@ -6,11 +6,17 @@ const Icon: React.FC<{ className: string }> = ({ className }) => {
     return <i className={className}></i>;
 };
 
-// --- Konfigurasi API (DISESUAIKAN UNTUK RAILWAY/VERCEL) ---
-// Key Vercel: VITE_APP_API_URL
-// Value Vercel: https://punto-backend-production.up.railway.app
-// URL Fallback diubah menjadi root path tanpa /api
-const API_URL = import.meta.env.VITE_APP_API_URL || 'http://127.0.0.1:5000';
+// --- Konfigurasi API ---
+// BASE_URL adalah nilai dari Vercel Environment Variable (misalnya: https://punto-backend-production.up.railway.app)
+const API_BASE_URL = import.meta.env.VITE_APP_API_URL || 'http://127.0.0.1:5000';
+
+// Fungsi untuk memastikan URL diakhiri dengan / untuk konsistensi.
+const ensureTrailingSlash = (url: string) => {
+    return url.endsWith('/') ? url : url + '/';
+};
+
+const API_URL = ensureTrailingSlash(API_BASE_URL);
+
 const colorClasses = ['color-red', 'color-green', 'color-blue', 'color-yellow'];
 
 // --- Interfaces Frontend (Mencerminkan Output JSON dari Python) ---
@@ -60,7 +66,7 @@ const Card: React.FC<CardProps> = ({ value, colorClass, type, isSelected = false
     }
 
     // type === 'hand'
-    const classNames = `card ${colorClass || ''} ${isSelected ? 'selected' : ''}`;
+    const classNames = `card ${colorClasses[0] || ''} ${isSelected ? 'selected' : ''}`;
     return (
         <div className={classNames} onClick={onClick}>
             {value}
@@ -191,8 +197,8 @@ const PuntoGame: React.FC = () => {
         setGameState('playing');
         
         try {
-            // Panggilan API menggunakan API_URL (root path)
-            const response = await fetch(`${API_URL}/start_game`, {
+            // Menggunakan API_URL yang dijamin memiliki trailing slash
+            const response = await fetch(`${API_URL}start_game`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ numPlayers, numAI }),
@@ -208,8 +214,8 @@ const PuntoGame: React.FC = () => {
             
         } catch (error) {
             console.error("Gagal memulai game:", error);
-            // Pesan error diubah agar sesuai dengan konfigurasi root baru
-            alert(`Gagal terhubung ke backend API di ${API_URL}. Pastikan Environment Variable VITE_APP_API_URL sudah benar dan tidak menggunakan /api.`);
+            // Pesan error diubah, merekomendasikan pengecekan CORS
+            alert(`Gagal terhubung ke backend API di ${API_BASE_URL}. Pastikan VITE_APP_API_URL sudah benar dan CORS telah diaktifkan untuk domain Vercel Anda di backend Railway.`);
             setGameState('menu'); 
         } finally {
             setIsThinking(false);
@@ -221,8 +227,8 @@ const PuntoGame: React.FC = () => {
 
         setIsThinking(true);
         try {
-            // Panggilan API menggunakan API_URL (root path)
-            const response = await fetch(`${API_URL}/make_move`, {
+            // Menggunakan API_URL yang dijamin memiliki trailing slash
+            const response = await fetch(`${API_URL}make_move`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -257,8 +263,8 @@ const PuntoGame: React.FC = () => {
         
         setIsThinking(true);
         try {
-            // Panggilan API menggunakan API_URL (root path)
-            const response = await fetch(`${API_URL}/ai_move`, {
+            // Menggunakan API_URL yang dijamin memiliki trailing slash
+            const response = await fetch(`${API_URL}ai_move`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ gameId: gameId }),

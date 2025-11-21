@@ -49,6 +49,7 @@ body {
     display: flex;
     flex-direction: column;
     position: relative;
+    z-index: 1;
 }
 
 .top-bar-container {
@@ -94,7 +95,6 @@ h1 i {
     margin-bottom: 20px;
 }
 
-/* Ganti .player-count dengan .player-config-controls */
 .player-config-controls {
     display: flex;
     gap: 30px;
@@ -116,7 +116,6 @@ h1 i {
     text-shadow: 1px 1px 0 #1a252f;
 }
 
-/* --- Styling untuk +/- Controls (Display Horizontal) --- */
 .value-control {
     display: flex;
     align-items: center;
@@ -170,7 +169,6 @@ h1 i {
     cursor: not-allowed;
     transform: none;
 }
-/* --- END Styling untuk +/- Controls --- */
 
 .setup-screen p {
     font-size: 0.5em;
@@ -253,6 +251,7 @@ h1 i {
     width: 100%;
     max-width: 400px; 
     height: 90px;
+    z-index: 6;
 }
 
 .player-area.player-p2 {
@@ -261,6 +260,7 @@ h1 i {
     transform: translateY(-50%);
     width: 100px;
     height: 320px;
+    z-index: 7;
 }
 
 .player-area.player-p3 {
@@ -270,6 +270,7 @@ h1 i {
     width: 100%;
     max-width: 400px; 
     height: 90px;
+    z-index: 8;
 }
 
 .player-area.player-p4 {
@@ -278,6 +279,7 @@ h1 i {
     transform: translateY(-50%);
     width: 100px;
     height: 320px;
+    z-index: 9;
 }
 
 .player-info {
@@ -290,6 +292,8 @@ h1 i {
     flex-direction: column;
     box-shadow: inset 0 -3px 0 rgba(0,0,0,0.3);
     transition: all 0.2s;
+    position: relative;
+    z-index: 10;
 }
 
 .player-area.player-p2 .player-info,
@@ -312,6 +316,8 @@ h1 i {
     margin-bottom: 6px;
     font-size: 0.38em;
     width: 100%;
+    flex-shrink: 0;
+    z-index: 11;
 }
 
 .player-area.player-p2 .player-header,
@@ -325,6 +331,7 @@ h1 i {
 .player-area.player-p2 .cards-left,
 .player-area.player-p4 .cards-left {
     margin-top: 0;
+    z-index: 20;
 }
 
 .player-name {
@@ -338,6 +345,7 @@ h1 i {
     padding: 3px 6px;
     font-size: 0.8em;
     border: 2px solid #000;
+    flex-shrink: 0;
 }
 
 .hand {
@@ -346,24 +354,25 @@ h1 i {
     flex-wrap: nowrap;
     flex: 1;
     align-items: center;
-    justify-content: center;
-    /* Mencegah overflow kartu di desktop/tablet */
-    overflow-x: auto; 
-    /* Menambah padding vertikal agar kartu tidak terpotong saat hover/selected */
-    padding: 5px 5px; 
-    /* PERBAIKAN: Hilangkan scroll bar vertikal yang tidak diinginkan */
-    overflow-y: hidden; 
-    min-height: 0; 
+    justify-content: flex-start;
+    overflow-x: auto;
+    overflow-y: visible;
+    padding: 5px 5px;
+    min-height: 0;
+    z-index: 30;
+    position: relative;
 }
 
+/* Memastikan kartu di area vertikal (desktop/tablet) terlihat */
 .player-area.player-p2 .hand,
 .player-area.player-p4 .hand {
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: center; 
     gap: 8px;
-    overflow-y: auto; 
+    overflow-y: hidden; 
     overflow-x: hidden;
+    z-index: 30;
 }
 
 .card {
@@ -382,8 +391,7 @@ h1 i {
     transition: all 0.1s;
     position: relative;
     flex-shrink: 0;
-    /* Base style for hand cards */
-    /* Akan ditimpa oleh kelas warna spesifik di bawah */
+    z-index: 41;
 }
 
 .card::before {
@@ -405,6 +413,7 @@ h1 i {
     box-shadow: 0 0 15px rgba(241,196,15,0.8);
     border-color: #f1c40f;
     animation: pixelSelected 0.8s infinite;
+    z-index: 22;
 }
 
 @keyframes pixelSelected {
@@ -428,6 +437,7 @@ h1 i {
     color: #7f8c8d;
     box-shadow: inset 0 -4px 0 rgba(0,0,0,0.3);
     flex-shrink: 0;
+    z-index: 21;
 }
 
 .card-back::before {
@@ -441,6 +451,7 @@ h1 i {
     min-height: 0;
     flex: 1;
     padding-bottom: 0px;
+    z-index: 3;
 }
 
 .board {
@@ -453,11 +464,11 @@ h1 i {
     border: 4px solid var(--pixel-border);
     border-bottom: 6px solid var(--pixel-border);
     aspect-ratio: 1;
-    /* Menyesuaikan max-height papan agar ada cukup ruang */
     max-height: calc(100vh - 220px); 
     max-width: calc(100vw - 300px);
     width: min(58vh, 58vw);
     box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    z-index: 4;
 }
 
 .cell {
@@ -517,7 +528,6 @@ h1 i {
     background: rgba(255,255,255,0.3);
 }
 
-/* PERBAIKAN: Terapkan style gradien pada .card (di tangan) dan .card-on-board (di papan) */
 .color-red, .card.color-red { 
     background: linear-gradient(180deg, #e74c3c 0%, #c0392b 100%);
 }
@@ -599,90 +609,162 @@ h1 i {
     75% { transform: translateY(-10px) rotate(5deg); }
 }
 
-/* Responsive - Tablet */
+/* ===========================
+   RESPONSIVE - TABLET 
+   =========================== */
 @media (max-width: 1024px) {
     h1 {
-        font-size: 1em;
+        font-size: 1.1em;
     }
 
+    .top-bar-container {
+        top: 12px;
+        left: 12px;
+    }
+
+    /* Setup screen adjustments */
+    .setup-screen h2 {
+        font-size: 0.85em;
+    }
+
+    .player-config-controls {
+        gap: 25px;
+        margin: 25px 0;
+    }
+
+    .config-group label {
+        font-size: 0.45em;
+    }
+
+    .value-display {
+        min-width: 110px;
+        padding: 9px 13px;
+        font-size: 0.65em;
+    }
+
+    .control-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 1.1em;
+    }
+
+    /* Player areas - Tablet */
     .player-area.player-p1 { 
-        height: 75px;
-        top: -35px;
+        height: 80px;
+        top: 2px;
+        max-width: 380px;
     }
 
     .player-area.player-p2 { 
-        width: 85px;
-        height: 260px;
-        right: 10px; 
+        width: 90px;
+        height: 280px;
+        right: 12px; 
     }
 
     .player-area.player-p3 { 
-        height: 75px;
-        bottom: 20px; 
+        height: 80px;
+        bottom: -5px;
+        max-width: 380px;
     }
 
     .player-area.player-p4 { 
-        width: 85px;
-        height: 260px;
-        left: 10px; 
+        width: 90px;
+        height: 280px;
+        left: 12px; 
     }
 
     .card {
-        width: 33px;
-        height: 45px;
-        font-size: 15px;
+        width: 35px;
+        height: 48px;
+        font-size: 16px;
     }
     
     .card-back {
-        width: 33px;
-        height: 45px;
-        font-size: 17px;
+        width: 35px;
+        height: 48px;
+        font-size: 18px;
     }
 
     .player-header {
-        font-size: 0.34em;
+        font-size: 0.36em;
     }
 
     .board {
-        max-height: calc(100vh - 210px);
-        max-width: calc(100vw - 230px);
-        width: min(52vh, 52vw);
+        max-height: calc(100vh - 200px);
+        max-width: calc(100vw - 250px);
+        width: min(55vh, 55vw);
+    }
+
+    .card-on-board {
+        font-size: clamp(9px, 1.4vw, 15px);
+    }
+
+    .info-box {
+        font-size: 0.38em;
+        padding: 4px 8px;
+    }
+
+    .ai-thinking {
+        font-size: 0.45em;
+    }
+
+    .restart-btn {
+        padding: 13px 26px;
+        font-size: 0.65em;
     }
 }
 
-/* Responsive - Mobile */
+/* ===========================
+   RESPONSIVE - MOBILE 
+   =========================== */
 @media (max-width: 768px) {
     body {
         overflow-y: auto;
+        overflow-x: hidden;
     }
 
     .game-container {
         height: auto;
         min-height: 100vh;
         padding: 10px;
+        border: 4px solid var(--pixel-border);
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
     }
 
     h1 {
-        font-size: 0.8em;
+        font-size: 0.85em;
+        text-shadow: 
+            2px 2px 0 #e74c3c,
+            -1px -1px 0 #3498db;
     }
     
     .info-box {
-        font-size: 0.3em;
+        font-size: 0.32em;
         padding: 3px 6px;
     }
 
     .top-bar-container {
         top: 10px;
         left: 10px;
+        z-index: 50;
     }
     
+    /* Setup screen - Mobile */
+    .setup-screen h2 {
+        font-size: 0.75em;
+        margin-bottom: 15px;
+    }
+
     .player-config-controls {
         flex-direction: column; 
-        gap: 20px;
+        gap: 18px;
+        margin: 20px 0;
     }
     
     .config-group label {
-        font-size: 0.4em;
+        font-size: 0.42em;
     }
 
     .value-display {
@@ -699,14 +781,30 @@ h1 i {
     
     .setup-screen p {
         font-size: 0.4em;
+        line-height: 1.8;
     }
 
-    /* Layout mobile - stack vertical */
+    /* Layout mobile - flex dengan order */
+    #gameScreen {
+        display: flex;
+        flex-direction: column;
+        height: auto;
+        width: 100%;
+        position: relative;
+        grid-template-areas: unset;
+        grid-template-rows: unset;
+    }
+
     .game-layout {
         position: relative;
         flex-direction: column;
-        padding: 60px 10px 10px 10px;
-        gap: 10px;
+        padding: 65px 5px 10px 5px;
+        gap: 8px;
+        overflow-y: auto;
+        overflow-x: hidden;
+        width: 100%;
+        height: auto;
+        display: flex;
     }
 
     .player-area {
@@ -717,11 +815,14 @@ h1 i {
         top: auto !important;
         bottom: auto !important;
         width: 100% !important;
+        max-width: 100% !important;
         height: auto !important;
+        margin: 5px 0 !important;
     }
 
+    /* Order untuk mobile: Board di tengah, pemain di sekitar */
     .player-area.player-p1 {
-        order: 1;
+        order: 2;
     }
 
     .player-area.player-p2 {
@@ -737,50 +838,133 @@ h1 i {
     }
 
     .board-container {
-        order: 2;
+        order: 1;
         width: 100%;
         padding: 10px 0;
+        flex-shrink: 0;
+        z-index: 3;
     }
 
     .player-info {
         flex-direction: row !important;
         align-items: center;
         padding: 8px;
-        min-height: 70px;
+        min-height: 85px;
+        gap: 8px;
+        z-index: 10;
+        position: relative;
     }
 
     .player-header {
-        flex-direction: row !important;
-        font-size: 0.35em;
-        min-width: 100px;
+        flex-direction: column !important;
+        text-align: left;
+        align-items: flex-start;
+        font-size: 0.32em;
+        min-width: 85px;
+        margin-bottom: 0;
+        gap: 3px;
+        flex-shrink: 0;
+        z-index: 11;
     }
 
+    .player-name {
+        font-size: 1em;
+    }
+
+    .cards-left {
+        font-size: 0.85em;
+        padding: 2px 5px;
+        flex-shrink: 0;
+    }
+
+    /* PERBAIKAN UTAMA: Mobile Hand Deck */
     .hand {
         flex-direction: row !important;
         flex-wrap: nowrap;
-        overflow-x: auto;
-        gap: 5px;
+        align-items: center;
+        justify-content: flex-start !important;
+        overflow-x: auto !important;
+        overflow-y: visible !important;
+        gap: 4px;
+        padding: 5px 8px;
+        flex: 1;
+        min-height: 65px;
+        display: flex !important;
+        z-index: 20;
+        position: relative;
+        contain: layout;
+    }
+
+    /* Ketika hand kosong (tidak ada kartu), tengahkan */
+    .hand:empty {
+        justify-content: center !important;
+    }
+    
+    /* Pastikan kartu terlihat dan tidak ada margin yang mendorongnya keluar */
+    .hand > * {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+
+    /* Style scrollbar di mobile */
+    .hand::-webkit-scrollbar {
+        height: 4px;
+    }
+
+    .hand::-webkit-scrollbar-track {
+        background: rgba(0,0,0,0.1);
+        border-radius: 4px;
+    }
+
+    .hand::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,0.4);
+        border-radius: 4px;
+    }
+
+    .hand::-webkit-scrollbar-thumb:hover {
+        background: rgba(255,255,255,0.6);
     }
 
     .card {
-        width: 28px;
-        height: 39px;
-        font-size: 13px;
+        width: 32px;
+        height: 45px;
+        font-size: 14px;
         flex-shrink: 0;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 21;
     }
     
     .card-back {
-        width: 28px;
-        height: 39px;
-        font-size: 14px;
+        width: 32px;
+        height: 45px;
+        font-size: 15px;
         flex-shrink: 0;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 21;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+    }
+
+    .card.selected {
+        transform: translateY(-8px) scale(1.1);
+        z-index: 22;
     }
 
     .board {
-        width: min(90vw, 90vh) !important;
-        max-width: 400px !important;
-        max-height: 400px !important;
+        width: min(92vw, 92vw) !important;
+        max-width: 420px !important;
+        max-height: 420px !important;
         margin: 0 auto;
+        z-index: 4;
     }
 
     .cell {
@@ -789,57 +973,170 @@ h1 i {
     }
 
     .card-on-board {
-        font-size: clamp(8px, 2vw, 14px);
+        font-size: clamp(8px, 2.2vw, 14px);
     }
 
     .ai-thinking {
-        font-size: 0.4em;
-        padding: 6px;
+        font-size: 0.38em;
+        padding: 6px 10px;
+        z-index: 100;
     }
 
     .winner-screen h2 {
-        font-size: 0.9em;
+        font-size: 0.85em;
     }
 
     .winner-info {
         font-size: 0.45em;
+        line-height: 1.8;
     }
 
     .restart-btn {
-        padding: 12px 20px;
+        padding: 12px 22px;
         font-size: 0.5em;
+        gap: 8px;
     }
 }
 
-/* Extra small mobile */
+/* ===========================
+   EXTRA SMALL MOBILE 
+   =========================== */
 @media (max-width: 480px) {
+    .game-container {
+        padding: 8px;
+    }
+
     h1 {
         font-size: 0.7em;
+        letter-spacing: 1px;
     }
 
     .info-box {
         font-size: 0.28em;
     }
 
+    .top-bar-container {
+        top: 8px;
+        left: 8px;
+    }
+
+    .setup-screen h2 {
+        font-size: 0.65em;
+    }
+
+    .value-display {
+        font-size: 0.55em;
+        padding: 7px 10px;
+        min-width: 90px;
+    }
+
+    .control-btn {
+        width: 28px;
+        height: 28px;
+        font-size: 0.95em;
+    }
+
+    .game-layout {
+        padding: 55px 3px 8px 3px;
+        gap: 6px;
+    }
+
+    .player-info {
+        min-height: 80px;
+        padding: 6px;
+    }
+
     .player-header {
-        font-size: 0.3em;
+        font-size: 0.28em;
+        min-width: 75px;
     }
 
     .card {
-        width: 25px;
-        height: 35px;
+        width: 28px;
+        height: 40px;
         font-size: 12px;
+        margin: 0;
     }
     
     .card-back {
-        width: 25px;
-        height: 35px;
+        width: 28px;
+        height: 40px;
         font-size: 13px;
+        margin: 0;
+    }
+
+    .hand {
+        gap: 3px;
+        padding: 6px 5px;
+        min-height: 60px;
     }
 
     .board {
-        width: min(95vw, 95vh) !important;
-        max-width: 350px !important;
-        max-height: 350px !important;
+        width: min(95vw, 95vw) !important;
+        max-width: 360px !important;
+        max-height: 360px !important;
+        gap: 1px;
+    }
+
+    .card-on-board {
+        font-size: clamp(7px, 2vw, 12px);
+    }
+
+    .ai-thinking {
+        font-size: 0.35em;
+        padding: 5px 8px;
+    }
+
+    .winner-screen h2 {
+        font-size: 0.7em;
+    }
+
+    .winner-info {
+        font-size: 0.4em;
+    }
+
+    .restart-btn {
+        padding: 10px 18px;
+        font-size: 0.45em;
+    }
+}
+
+/* ===========================
+   LANDSCAPE MOBILE FIX
+   =========================== */@media (max-width: 768px) {
+
+    /* Player box jadi kolom agar kartu muncul di tengah */
+    .player-info {
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 8px !important;
+        padding: 10px !important;
+        min-height: 120px !important;
+    }
+
+    /* Header tetap di atas */
+    .player-header {
+        width: 100% !important;
+        align-items: center !important;
+        text-align: center !important;
+        flex-direction: column !important;
+        margin-bottom: 5px !important;
+    }
+
+    /* Hand berada di tengah */
+    .hand {
+        width: 100% !important;
+        justify-content: center !important;
+        align-items: center !important;
+        overflow-x: auto !important;
+        margin-top: 4px !important;
+        z-index: 50 !important;
+    }
+
+    /* Kartu terlihat */
+    .card, .card-back {
+        z-index: 60 !important;
+        position: relative !important;
     }
 }

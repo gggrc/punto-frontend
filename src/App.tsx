@@ -6,17 +6,13 @@ const Icon: React.FC<{ className: string }> = ({ className }) => {
     return <i className={className}></i>;
 };
 
-// --- Konfigurasi API (FINAL: Menggunakan Root Path) ---
-// Frontend hanya tahu path "/" saat development (via proxy) atau production (via Vercel Rewrites)
-// Catatan: Root path ('/') digunakan untuk memanggil endpoint: /start_game, /make_move, dll.
+// --- Konfigurasi API ---
 const API_URL = '/'; 
-// URL Fallback Lokal dipertahankan 
 const API_BASE_URL = import.meta.env.VITE_APP_API_URL || 'http://127.0.0.1:5000';
-
 
 const colorClasses = ['color-red', 'color-green', 'color-blue', 'color-yellow'];
 
-// --- Interfaces Frontend (Mencerminkan Output JSON dari Python) ---
+// --- Interfaces Frontend ---
 interface PyCell {
     value: number;
     player: number; 
@@ -27,7 +23,7 @@ interface PyPlayer {
     name: string;
     is_ai: boolean;
     color_id: number; 
-    hand: number[]; // Hanya nilai kartu untuk pemain aktif
+    hand: number[]; 
     total_cards: number;
 }
 
@@ -71,14 +67,63 @@ const Card: React.FC<CardProps> = ({ value, colorClass, type, isSelected = false
     );
 };
 
+// --- Komponen Hand (Deck Pemain) ---
+interface HandProps {
+    cards: number[];
+    colorClass: string;
+    selectedIndex: number | null;
+    onCardSelect: (index: number) => void;
+    canSelectCards: boolean;
+}
+
+const Hand: React.FC<HandProps> = ({ cards, colorClass, selectedIndex, onCardSelect, canSelectCards }) => {
+    return (
+        <div className="hand">
+            {cards.map((card_value, index) => (
+                <Card 
+                    key={`card-${index}`}
+                    type="hand" 
+                    value={card_value} 
+                    colorClass={colorClass} 
+                    isSelected={selectedIndex === index}
+                    onClick={() => canSelectCards && onCardSelect(index)}
+                />
+            ))}
+        </div>
+    );
+};
+
+// --- Komponen Hidden Hand (Kartu Lawan/AI) ---
+interface HiddenHandProps {
+    cardCount: number;
+}
+
+const HiddenHand: React.FC<HiddenHandProps> = ({ cardCount }) => {
+    return (
+        <div className="hand">
+            {Array(cardCount).fill(0).map((_, i) => (
+                <Card key={`hidden-card-${i}`} type="back" />
+            ))}
+        </div>
+    );
+};
+
 // --- Komponen Player Area ---
 interface PlayerAreaProps {
     player: PyPlayer;
     isActive: boolean;
-    handContent: React.ReactNode;
+    selectedCardIndex: number | null;
+    onCardSelect: (index: number) => void;
+    canSelectCards: boolean;
 }
 
-const PlayerArea: React.FC<PlayerAreaProps> = ({ player, isActive, handContent }) => {
+const PlayerArea: React.FC<PlayerAreaProps> = ({ 
+    player, 
+    isActive, 
+    selectedCardIndex, 
+    onCardSelect, 
+    canSelectCards 
+}) => {
     const className = `player-area player-p${player.id + 1} ${isActive ? 'active' : ''}`;
     const cardColor = colorClasses[player.color_id];
 
@@ -86,12 +131,24 @@ const PlayerArea: React.FC<PlayerAreaProps> = ({ player, isActive, handContent }
         <div className={className} id={`playerArea${player.id}`}>
             <div className="player-info" style={{ borderColor: cardColor }}>
                 <div className="player-header">
-                    <span className="player-name" style={{ color: cardColor }}>{player.name}</span>
+                    <span className="player-name" style={{ color: cardColor }}>
+                        {player.name}
+                    </span>
                     <span className="cards-left">{player.total_cards} Kartu</span>
                 </div>
-                <div className="hand">
-                    {handContent}
-                </div>
+                
+                {/* Render hand berdasarkan apakah bisa select atau tidak */}
+                {canSelectCards && player.id !== undefined ? (
+                    <Hand 
+                        cards={player.hand}
+                        colorClass={cardColor}
+                        selectedIndex={selectedCardIndex}
+                        onCardSelect={onCardSelect}
+                        canSelectCards={canSelectCards}
+                    />
+                ) : (
+                    <HiddenHand cardCount={player.total_cards} />
+                )}
             </div>
         </div>
     );
@@ -109,19 +166,16 @@ const Board: React.FC<BoardProps> = ({ boardState, currentPlayerId, selectedCard
     const boardSize = 9;
     const cells = [];
     
-    // Logika penanda visual untuk langkah valid (perkiraan di frontend)
     const getIsClickable = (row: number, col: number, cell: PyCell | null, isFirstMove: boolean) => {
         if (selectedCardValue === null) return false;
         
         const isCenter = row === 4 && col === 4;
         const isEmpty = cell === null;
         
-        // 1. Jika langkah pertama, harus di tengah
         if (isFirstMove) {
             return isCenter;
         }
         
-        // 2. Jika sel kosong, harus bersebelahan
         if (isEmpty) {
             const directions = [
                 [-1, 0], [1, 0], [0, -1], [0, 1], 
@@ -137,7 +191,6 @@ const Board: React.FC<BoardProps> = ({ boardState, currentPlayerId, selectedCard
             return false;
         } 
         
-        // 3. Jika menumpuk, harus kartu lawan dan nilai lebih tinggi
         return cell!.player !== currentPlayerId && selectedCardValue! > cell!.value;
     };
     
@@ -175,8 +228,7 @@ const Board: React.FC<BoardProps> = ({ boardState, currentPlayerId, selectedCard
     );
 };
 
-
-// --- Komponen Utama Game Punto (Frontend Controller) ---
+// --- Komponen Utama Game Punto ---
 const PuntoGame: React.FC = () => {
     const [gameState, setGameState] = useState<'menu' | 'playing' | 'winner'>('menu');
     const [gameData, setGameData] = useState<GameState | null>(null);
@@ -184,7 +236,6 @@ const PuntoGame: React.FC = () => {
     const [selectedCardIndex, setSelectedCardIndex] = useState<number | null>(null);
     const [isThinking, setIsThinking] = useState<boolean>(false);
     
-    // Default ke 4 pemain, 3 AI
     const [numPlayersSelected, setNumPlayersSelected] = useState<number>(4);
     const [numAISelected, setNumAISelected] = useState<number>(3); 
 
@@ -237,6 +288,12 @@ const PuntoGame: React.FC = () => {
     const handleCellClick = async (row: number, col: number) => {
         if (!gameData || gameData.gameOver || isThinking || selectedCardIndex === null) return;
 
+        if (!gameId) {
+             alert("Error: Game ID tidak ada. Silakan mulai ulang game.");
+             setGameState('menu'); 
+             return;
+        }
+
         setIsThinking(true);
         const endpoint = 'make_move';
         const fetchUrl = API_URL === '/' ? `/${endpoint}` : `${API_BASE_URL}/${endpoint}`;
@@ -275,6 +332,12 @@ const PuntoGame: React.FC = () => {
     const requestAIMove = async () => {
         if (!gameData || gameData.gameOver || isThinking) return;
         
+        if (!gameId) {
+             console.error("Game ID tidak ada saat giliran AI.");
+             setGameState('menu'); 
+             return;
+        }
+
         setIsThinking(true);
         const endpoint = 'ai_move';
         const fetchUrl = API_URL === '/' ? `/${endpoint}` : `${API_BASE_URL}/${endpoint}`;
@@ -290,7 +353,6 @@ const PuntoGame: React.FC = () => {
             
             const data: GameState = await response.json();
             
-            // Tambahkan delay kecil untuk efek "berpikir}
             setTimeout(() => {
                 setGameData(data);
                 setIsThinking(false);
@@ -309,7 +371,6 @@ const PuntoGame: React.FC = () => {
                 setGameState('winner');
             } else {
                 const currentPlayer = gameData.players.find(p => p.id === gameData.currentPlayerId);
-                // Hanya panggil AI jika giliran pemain saat ini adalah AI
                 if (currentPlayer?.is_ai) {
                     requestAIMove();
                 }
@@ -324,18 +385,15 @@ const PuntoGame: React.FC = () => {
     };
 
     const handleCardSelect = (index: number) => {
-        // Cek apakah pemain saat ini adalah manusia sebelum memilih kartu
         const currentPlayer = gameData?.players.find(p => p.id === gameData?.currentPlayerId);
         if (currentPlayer && !currentPlayer.is_ai) {
              setSelectedCardIndex(index);
         }
     }
     
-    // --- FUNGSI HANDLER UNTUK TOMBOL ---
     const updateNumPlayers = (change: number) => {
         setNumPlayersSelected(prev => {
             const newTotal = Math.min(4, Math.max(2, prev + change));
-            // Batasi AI agar tidak melebihi newTotal - 1
             setNumAISelected(aiPrev => Math.min(newTotal - 1, aiPrev)); 
             return newTotal;
         });
@@ -347,7 +405,6 @@ const PuntoGame: React.FC = () => {
             return newAI;
         });
     };
-    // ---------------------------------
     
     const currentPlayer = gameData?.players.find(p => p.id === gameData?.currentPlayerId);
     const currentPlayerHand = (currentPlayer && !currentPlayer.is_ai) ? currentPlayer.hand : [];
@@ -360,7 +417,6 @@ const PuntoGame: React.FC = () => {
         
         const maxAI = numPlayersSelected - 1;
 
-        // Komponen Kustom untuk Control +/-
         const ConfigControl: React.FC<{ label: string, value: number, onIncrement: () => void, onDecrement: () => void, minValue: number, maxValue: number, unit: string }> = ({ label, value, onIncrement, onDecrement, minValue, maxValue, unit }) => (
             <div className="config-group">
                 <label>{label}</label>
@@ -372,7 +428,6 @@ const PuntoGame: React.FC = () => {
                     >
                         -
                     </button>
-                    {/* Menggabungkan nilai dan unit di dalam display */}
                     <div className="value-display">{value} {unit}</div>
                     <button 
                         onClick={onIncrement} 
@@ -432,33 +487,12 @@ const PuntoGame: React.FC = () => {
     } else if (gameState === 'playing' && gameData) {
         
         const playersByPosition = [
-            gameData.players.find(p => p.id === 0), // P1 - Atas
-            gameData.players.find(p => p.id === 1), // P2 - Kanan
-            gameData.players.find(p => p.id === 2), // P3 - Bawah
-            gameData.players.find(p => p.id === 3), // P4 - Kiri
+            gameData.players.find(p => p.id === 0),
+            gameData.players.find(p => p.id === 1),
+            gameData.players.find(p => p.id === 2),
+            gameData.players.find(p => p.id === 3),
         ].filter(p => p !== undefined) as PyPlayer[];
         
-        const renderHand = (player: PyPlayer) => {
-            const playerColorClass = colorClasses[player.color_id]; // Ambil kelas warna yang benar
-            
-            if (player.id === gameData.currentPlayerId && !player.is_ai) {
-                // Tampilkan kartu jika giliran pemain manusia
-                return player.hand.map((card_value, index) => (
-                    <Card 
-                        key={index} 
-                        type="hand" 
-                        value={card_value} 
-                        colorClass={playerColorClass} // Gunakan kelas warna pemain yang benar
-                        isSelected={selectedCardIndex === index}
-                        onClick={() => handleCardSelect(index)}
-                    />
-                ));
-            } else {
-                // Tampilkan kartu belakang untuk pemain lain atau AI
-                return Array(player.total_cards).fill(0).map((_, i) => <Card key={i} type="back" />);
-            }
-        };
-
         const topPlayer = playersByPosition.find(p => p.id === 0);
         const rightPlayer = playersByPosition.find(p => p.id === 1);
         const bottomPlayer = playersByPosition.find(p => p.id === 2);
@@ -471,21 +505,23 @@ const PuntoGame: React.FC = () => {
                 </div>
 
                 <div className="game-layout">
-                    {/* P1 - Atas */}
                     {topPlayer && (
                         <PlayerArea 
                             player={topPlayer} 
                             isActive={topPlayer.id === gameData.currentPlayerId}
-                            handContent={renderHand(topPlayer)}
+                            selectedCardIndex={topPlayer.id === gameData.currentPlayerId ? selectedCardIndex : null}
+                            onCardSelect={handleCardSelect}
+                            canSelectCards={topPlayer.id === gameData.currentPlayerId && !topPlayer.is_ai}
                         />
                     )}
                     
-                    {/* P4 - Kiri */}
                     {leftPlayer && (
                         <PlayerArea 
                             player={leftPlayer} 
                             isActive={leftPlayer.id === gameData.currentPlayerId}
-                            handContent={renderHand(leftPlayer)}
+                            selectedCardIndex={leftPlayer.id === gameData.currentPlayerId ? selectedCardIndex : null}
+                            onCardSelect={handleCardSelect}
+                            canSelectCards={leftPlayer.id === gameData.currentPlayerId && !leftPlayer.is_ai}
                         />
                     )}
                     
@@ -496,21 +532,23 @@ const PuntoGame: React.FC = () => {
                         handleCellClick={handleCellClick}
                     />
                     
-                    {/* P2 - Kanan */}
                     {rightPlayer && (
                         <PlayerArea 
                             player={rightPlayer} 
                             isActive={rightPlayer.id === gameData.currentPlayerId}
-                            handContent={renderHand(rightPlayer)}
+                            selectedCardIndex={rightPlayer.id === gameData.currentPlayerId ? selectedCardIndex : null}
+                            onCardSelect={handleCardSelect}
+                            canSelectCards={rightPlayer.id === gameData.currentPlayerId && !rightPlayer.is_ai}
                         />
                     )}
                     
-                    {/* P3 - Bawah */}
                     {bottomPlayer && (
                         <PlayerArea 
                             player={bottomPlayer} 
                             isActive={bottomPlayer.id === gameData.currentPlayerId}
-                            handContent={renderHand(bottomPlayer)}
+                            selectedCardIndex={bottomPlayer.id === gameData.currentPlayerId ? selectedCardIndex : null}
+                            onCardSelect={handleCardSelect}
+                            canSelectCards={bottomPlayer.id === gameData.currentPlayerId && !bottomPlayer.is_ai}
                         />
                     )}
                 </div>
@@ -537,21 +575,11 @@ const PuntoGame: React.FC = () => {
         )
     }
 
-    // --- Render Komponen Utama ---
     return (
         <div className="game-container">
             <div className="top-bar-container">
                 <div className="header-info-group">
                     <h1><Icon className="fas fa-bullseye" /> PUNTO</h1>
-                    {/* Bagian .game-info dihilangkan sesuai permintaan */}
-                    {/* <div id="gameInfo" className="game-info">
-                        <div className="info-box">
-                            Giliran: <span id="currentPlayer" style={{color: currentPlayer ? colorClasses[currentPlayer.color_id] : 'white'}}>{currentPlayer?.name || 'Pilih Pemain'}</span>
-                        </div>
-                        <div className="info-box">
-                            Kartu: <span id="selectedCard">{selectedCardValue !== null ? selectedCardValue : '-'}</span>
-                        </div>
-                    </div> */}
                 </div>
             </div>
             

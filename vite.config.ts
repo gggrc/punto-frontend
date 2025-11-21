@@ -1,32 +1,31 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// PASTIKAN URL INI BENAR
-const RAILWAY_BACKEND_URL = 'https://punto-backend-production.up.railway.app'; 
+// URL Fallback Lokal (Pastikan Flask server berjalan di port 5000)
+const LOCAL_BACKEND_URL = 'http://127.0.0.1:5000'; 
 
-// https://vite.dev/config/
+// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  // PERBAIKAN: Menambahkan proxy untuk setiap endpoint root
+  // PERBAIKAN: Mengganti proxy ke URL lokal untuk pengembangan
   server: {
     proxy: {
       '/start_game': {
-        target: RAILWAY_BACKEND_URL, 
+        target: LOCAL_BACKEND_URL, 
         changeOrigin: true,
-        rewrite: (path) => path // Path sudah benar, tidak perlu rewrite
+        rewrite: (path) => path
       },
       '/make_move': {
-        target: RAILWAY_BACKEND_URL, 
+        target: LOCAL_BACKEND_URL, 
         changeOrigin: true,
         rewrite: (path) => path
       },
       '/ai_move': {
-        target: RAILWAY_BACKEND_URL, 
+        target: LOCAL_BACKEND_URL, 
         changeOrigin: true,
         rewrite: (path) => path
       },
-      // HATI-HATI: Proxy root (/) dapat mengganggu aset statis.
-      // Kami hanya mendefinisikan endpoint API yang jelas.
+      // HATI-HATI: Jika Anda ingin menguji Railway dari lokal, ganti LOCAL_BACKEND_URL
     }
   }
 });

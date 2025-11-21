@@ -56,14 +56,14 @@ const Card: React.FC<CardProps> = ({ value, colorClass, type, isSelected = false
 
     if (type === 'board') {
         return (
-            <div className={`card-on-board ${colorClass}`}>
+            <div className={`card-on-board ${colorClasses[0] || ''} ${colorClass}`}>
                 {value}
             </div>
         );
     }
 
     // type === 'hand'
-    const classNames = `card ${colorClasses[0] || ''} ${isSelected ? 'selected' : ''}`;
+    const classNames = `card ${colorClass || colorClasses[0]} ${isSelected ? 'selected' : ''}`;
     return (
         <div className={classNames} onClick={onClick}>
             {value}
@@ -184,17 +184,26 @@ const PuntoGame: React.FC = () => {
     const [selectedCardIndex, setSelectedCardIndex] = useState<number | null>(null);
     const [isThinking, setIsThinking] = useState<boolean>(false);
     
+    // Default ke 4 pemain, 3 AI
     const [numPlayersSelected, setNumPlayersSelected] = useState<number>(4);
     const [numAISelected, setNumAISelected] = useState<number>(3); 
 
     // --- FUNGSI API ---
 
     const handleStartGame = async (numPlayers: number, numAI: number) => {
+        if (numAI >= numPlayers) {
+            alert("Jumlah AI harus kurang dari total pemain.");
+            return;
+        }
+        if (numPlayers < 2 || numPlayers > 4) {
+            alert("Total pemain harus antara 2 hingga 4.");
+            return;
+        }
+
         setIsThinking(true);
         setGameState('playing');
         
         const endpoint = 'start_game';
-        // Menggunakan fetchUrl = '/start_game' (jika deployed) atau 'http://127.0.0.1:5000/start_game' (jika lokal)
         const fetchUrl = API_URL === '/' ? `/${endpoint}` : `${API_BASE_URL}/${endpoint}`;
 
         try {
@@ -204,7 +213,6 @@ const PuntoGame: React.FC = () => {
                 body: JSON.stringify({ numPlayers, numAI }),
             });
             
-            // Periksa status 404 (Not Found) secara eksplisit untuk debugging
             if (response.status === 404) {
                  throw new Error(`Endpoint not found. Check Vercel Rewrite/Proxy configuration. Tried URL: ${fetchUrl}`);
             }
@@ -219,11 +227,7 @@ const PuntoGame: React.FC = () => {
             
         } catch (error) {
             console.error("Gagal memulai game:", error);
-            // Memberikan instruksi troubleshooting yang lebih jelas
-            alert(`Gagal terhubung ke backend API. Pastikan: 
-1. Backend Railway sudah di-deploy dan berjalan.
-2. Konfigurasi Vercel Rewrite/Proxy ke Railway sudah benar.
-3. Error: ${error}`);
+            alert(`Gagal terhubung ke backend API. Error: ${error}`);
             setGameState('menu'); 
         } finally {
             setIsThinking(false);
@@ -327,6 +331,24 @@ const PuntoGame: React.FC = () => {
         }
     }
     
+    // --- FUNGSI HANDLER UNTUK TOMBOL ---
+    const updateNumPlayers = (change: number) => {
+        setNumPlayersSelected(prev => {
+            const newTotal = Math.min(4, Math.max(2, prev + change));
+            // Batasi AI agar tidak melebihi newTotal - 1
+            setNumAISelected(aiPrev => Math.min(newTotal - 1, aiPrev)); 
+            return newTotal;
+        });
+    };
+
+    const updateNumAI = (change: number) => {
+        setNumAISelected(prev => {
+            const newAI = Math.min(numPlayersSelected - 1, Math.max(1, prev + change));
+            return newAI;
+        });
+    };
+    // ---------------------------------
+    
     const currentPlayer = gameData?.players.find(p => p.id === gameData?.currentPlayerId);
     const currentPlayerHand = (currentPlayer && !currentPlayer.is_ai) ? currentPlayer.hand : [];
     const selectedCardValue = selectedCardIndex !== null ? currentPlayerHand[selectedCardIndex] : null;
@@ -335,17 +357,63 @@ const PuntoGame: React.FC = () => {
     let screenContent;
 
     if (gameState === 'menu') {
+        
+        const maxAI = numPlayersSelected - 1;
+
+        // Komponen Kustom untuk Control +/-
+        const ConfigControl: React.FC<{ label: string, value: number, onIncrement: () => void, onDecrement: () => void, minValue: number, maxValue: number, unit: string }> = ({ label, value, onIncrement, onDecrement, minValue, maxValue, unit }) => (
+            <div className="config-group">
+                <label>{label}</label>
+                <div className="value-control">
+                    <button 
+                        onClick={onDecrement} 
+                        disabled={value <= minValue}
+                        className="control-btn"
+                    >
+                        -
+                    </button>
+                    {/* Menggabungkan nilai dan unit di dalam display */}
+                    <div className="value-display">{value} {unit}</div>
+                    <button 
+                        onClick={onIncrement} 
+                        disabled={value >= maxValue}
+                        className="control-btn"
+                    >
+                        +
+                    </button>
+                </div>
+            </div>
+        );
+        
         screenContent = (
             <div id="setupScreen" className="setup-screen">
                 <h2>Pilih Konfigurasi Game</h2>
-                <div className="player-count">
-                    <button onClick={() => { setNumPlayersSelected(2); setNumAISelected(1); }}>2 Pemain (1 AI)</button>
-                    <button onClick={() => { setNumPlayersSelected(3); setNumAISelected(2); }}>3 Pemain (2 AI)</button>
-                    <button onClick={() => { setNumPlayersSelected(4); setNumAISelected(3); }}>4 Pemain (3 AI)</button>
+                
+                <div className="player-config-controls">
+                    
+                    <ConfigControl
+                        label="Total Pemain"
+                        value={numPlayersSelected}
+                        onIncrement={() => updateNumPlayers(1)}
+                        onDecrement={() => updateNumPlayers(-1)}
+                        minValue={2}
+                        maxValue={4}
+                        unit="Pemain"
+                    />
+
+                    <ConfigControl
+                        label="Jumlah AI"
+                        value={numAISelected}
+                        onIncrement={() => updateNumAI(1)}
+                        onDecrement={() => updateNumAI(-1)}
+                        minValue={1}
+                        maxValue={maxAI}
+                        unit="AI"
+                    />
                 </div>
                 
-                <div className="info-box" style={{marginBottom: '20px', fontSize: '0.5em'}}>
-                    Konfigurasi: {numPlayersSelected} Pemain Total, {numAISelected} AI
+                <div className="info-box" style={{marginBottom: '20px', fontSize: '0.5em', marginTop: '10px'}}>
+                    Konfigurasi Saat Ini: {numPlayersSelected} Pemain Total, {numAISelected} AI, {numPlayersSelected - numAISelected} Manusia
                 </div>
                 
                 <button 
@@ -360,6 +428,7 @@ const PuntoGame: React.FC = () => {
                 </p>
             </div>
         );
+        
     } else if (gameState === 'playing' && gameData) {
         
         const playersByPosition = [
@@ -370,6 +439,8 @@ const PuntoGame: React.FC = () => {
         ].filter(p => p !== undefined) as PyPlayer[];
         
         const renderHand = (player: PyPlayer) => {
+            const playerColorClass = colorClasses[player.color_id]; // Ambil kelas warna yang benar
+            
             if (player.id === gameData.currentPlayerId && !player.is_ai) {
                 // Tampilkan kartu jika giliran pemain manusia
                 return player.hand.map((card_value, index) => (
@@ -377,7 +448,7 @@ const PuntoGame: React.FC = () => {
                         key={index} 
                         type="hand" 
                         value={card_value} 
-                        colorClass={colorClasses[player.color_id]}
+                        colorClass={playerColorClass} // Gunakan kelas warna pemain yang benar
                         isSelected={selectedCardIndex === index}
                         onClick={() => handleCardSelect(index)}
                     />
@@ -472,14 +543,15 @@ const PuntoGame: React.FC = () => {
             <div className="top-bar-container">
                 <div className="header-info-group">
                     <h1><Icon className="fas fa-bullseye" /> PUNTO</h1>
-                    <div id="gameInfo" className="game-info">
+                    {/* Bagian .game-info dihilangkan sesuai permintaan */}
+                    {/* <div id="gameInfo" className="game-info">
                         <div className="info-box">
                             Giliran: <span id="currentPlayer" style={{color: currentPlayer ? colorClasses[currentPlayer.color_id] : 'white'}}>{currentPlayer?.name || 'Pilih Pemain'}</span>
                         </div>
                         <div className="info-box">
                             Kartu: <span id="selectedCard">{selectedCardValue !== null ? selectedCardValue : '-'}</span>
                         </div>
-                    </div>
+                    </div> */}
                 </div>
             </div>
             

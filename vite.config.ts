@@ -5,7 +5,6 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   // PERBAIKAN KRUSIAL: Menambahkan Proxy untuk Development dan Production
-  // Ini menyelesaikan masalah "double URL" (Vercel domain + Railway URL)
   server: {
     proxy: {
       '/api': {

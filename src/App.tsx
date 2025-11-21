@@ -9,8 +9,8 @@ const Icon: React.FC<{ className: string }> = ({ className }) => {
 // --- Konfigurasi API (FINAL: Menggunakan Proxy Path) ---
 // Frontend hanya tahu path "/api/" saat development, atau di production setelah Vercel Rewrites
 const API_URL = '/api/'; 
-// URL Fallback Lokal dipertahankan untuk pure local development (jika API_URL tidak terdefinsi)
-const API_BASE_URL = import.meta.env.VITE_APP_API_URL || '[http://127.0.0.1:5000](http://127.0.0.1:5000)';
+// PERBAIKAN KRUSIAL: Menghilangkan format Markdown dari URL fallback lokal
+const API_BASE_URL = import.meta.env.VITE_APP_API_URL || 'http://127.0.0.1:5000';
 
 
 const colorClasses = ['color-red', 'color-green', 'color-blue', 'color-yellow'];
@@ -193,6 +193,8 @@ const PuntoGame: React.FC = () => {
         setGameState('playing');
         
         // Tentukan URL untuk fetch (lokal atau proxy)
+        // Logika ini menggunakan '/api/' untuk development (via Vite proxy) atau production (via Vercel rewrite).
+        // Jika API_URL bukan '/api/', ia menggunakan API_BASE_URL (URL absolute untuk debugging atau fallback)
         const fetchUrl = API_URL === '/api/' ? `${API_URL}start_game` : `${API_BASE_URL}/start_game`;
 
         try {

@@ -193,8 +193,6 @@ const PuntoGame: React.FC = () => {
         setGameState('playing');
         
         // Tentukan URL untuk fetch (lokal atau proxy)
-        // Logika ini menggunakan '/api/' untuk development (via Vite proxy) atau production (via Vercel rewrite).
-        // Jika API_URL bukan '/api/', ia menggunakan API_BASE_URL (URL absolute untuk debugging atau fallback)
         const fetchUrl = API_URL === '/api/' ? `${API_URL}start_game` : `${API_BASE_URL}/start_game`;
 
         try {

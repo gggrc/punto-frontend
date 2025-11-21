@@ -8,7 +8,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        // Ganti dengan URL Railway Anda yang sebenarnya
+        // PASTIKAN URL RAILWAY INI BENAR
         target: 'https://punto-backend-production.up.railway.app', 
         changeOrigin: true,
         // Rewrite path: /api/start_game -> /start_game (karena kita menghilangkan /api di Flask)

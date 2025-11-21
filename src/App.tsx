@@ -6,10 +6,11 @@ const Icon: React.FC<{ className: string }> = ({ className }) => {
     return <i className={className}></i>;
 };
 
-// --- Konfigurasi API (FINAL: Menggunakan Proxy Path) ---
-// Frontend hanya tahu path "/api/" saat development, atau di production setelah Vercel Rewrites
-const API_URL = '/api/'; 
-// PERBAIKAN KRUSIAL: Menghilangkan format Markdown dari URL fallback lokal
+// --- Konfigurasi API (FINAL: Menggunakan Root Path) ---
+// Frontend hanya tahu path "/" saat development (via proxy) atau production (via Vercel Rewrites)
+// Catatan: Root path ('/') digunakan untuk memanggil endpoint: /start_game, /make_move, dll.
+const API_URL = '/'; 
+// URL Fallback Lokal dipertahankan 
 const API_BASE_URL = import.meta.env.VITE_APP_API_URL || 'http://127.0.0.1:5000';
 
 
@@ -192,8 +193,9 @@ const PuntoGame: React.FC = () => {
         setIsThinking(true);
         setGameState('playing');
         
-        // Tentukan URL untuk fetch (lokal atau proxy)
-        const fetchUrl = API_URL === '/api/' ? `${API_URL}start_game` : `${API_BASE_URL}/start_game`;
+        const endpoint = 'start_game';
+        // Menggunakan fetchUrl = '/start_game' (jika deployed) atau 'http://127.0.0.1:5000/start_game' (jika lokal)
+        const fetchUrl = API_URL === '/' ? `/${endpoint}` : `${API_BASE_URL}/${endpoint}`;
 
         try {
             const response = await fetch(fetchUrl, {
@@ -202,6 +204,11 @@ const PuntoGame: React.FC = () => {
                 body: JSON.stringify({ numPlayers, numAI }),
             });
             
+            // Periksa status 404 (Not Found) secara eksplisit untuk debugging
+            if (response.status === 404) {
+                 throw new Error(`Endpoint not found. Check Vercel Rewrite/Proxy configuration. Tried URL: ${fetchUrl}`);
+            }
+
             if (!response.ok) throw new Error('Failed to start game on server');
             
             const data: GameState = await response.json();
@@ -214,8 +221,8 @@ const PuntoGame: React.FC = () => {
             console.error("Gagal memulai game:", error);
             // Memberikan instruksi troubleshooting yang lebih jelas
             alert(`Gagal terhubung ke backend API. Pastikan: 
-1. Backend Railway sudah di-deploy dengan CORS yang benar.
-2. Sedang berjalan di lokal (127.0.0.1:5000) jika Anda menggunakan 'npm run dev'.
+1. Backend Railway sudah di-deploy dan berjalan.
+2. Konfigurasi Vercel Rewrite/Proxy ke Railway sudah benar.
 3. Error: ${error}`);
             setGameState('menu'); 
         } finally {
@@ -227,7 +234,8 @@ const PuntoGame: React.FC = () => {
         if (!gameData || gameData.gameOver || isThinking || selectedCardIndex === null) return;
 
         setIsThinking(true);
-        const fetchUrl = API_URL === '/api/' ? `${API_URL}make_move` : `${API_BASE_URL}/make_move`;
+        const endpoint = 'make_move';
+        const fetchUrl = API_URL === '/' ? `/${endpoint}` : `${API_BASE_URL}/${endpoint}`;
         
         try {
             const response = await fetch(fetchUrl, {
@@ -264,7 +272,8 @@ const PuntoGame: React.FC = () => {
         if (!gameData || gameData.gameOver || isThinking) return;
         
         setIsThinking(true);
-        const fetchUrl = API_URL === '/api/' ? `${API_URL}ai_move` : `${API_BASE_URL}/ai_move`;
+        const endpoint = 'ai_move';
+        const fetchUrl = API_URL === '/' ? `/${endpoint}` : `${API_BASE_URL}/${endpoint}`;
 
         try {
             const response = await fetch(fetchUrl, {
@@ -277,7 +286,7 @@ const PuntoGame: React.FC = () => {
             
             const data: GameState = await response.json();
             
-            // Tambahkan delay kecil untuk efek "berpikir"
+            // Tambahkan delay kecil untuk efek "berpikir}
             setTimeout(() => {
                 setGameData(data);
                 setIsThinking(false);

@@ -285,7 +285,6 @@ h1 i {
 .player-info {
     background: #3d5368;
     padding: 6px 10px;
-    /* Border color kini dinamis, tetapi style normalnya default ke pixel-border */
     border: 3px solid var(--pixel-border);
     width: 100%;
     height: 100%;
@@ -305,9 +304,8 @@ h1 i {
 }
 
 .player-area.active .player-info {
-    /* MENGHAPUS hardcode kuning. Border dan shadow dikendalikan oleh inline style di App.tsx */
-    /* border-color: #f39c12; */
-    /* box-shadow: 0 0 15px rgba(241,196,15,0.5); */
+    border-color: #f39c12;
+    box-shadow: 0 0 15px rgba(241,196,15,0.5);
     transform: scale(1.02);
 }
 
@@ -610,64 +608,6 @@ h1 i {
     50% { transform: translateY(0) rotate(0deg); }
     75% { transform: translateY(-10px) rotate(5deg); }
 }
-
-/* --- Modal Styling --- */
-
-.modal-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5); /* Latar belakang gelap transparan */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000; /* Pastikan di atas semua elemen game */
-    backdrop-filter: blur(4px);
-}
-
-.modal-content {
-    background: #3d5368;
-    padding: 30px;
-    border: 6px solid #f39c12; /* Border kuning untuk kemenangan */
-    box-shadow: 0 0 20px rgba(241, 196, 15, 0.8);
-    text-align: center;
-    max-width: 400px;
-    width: 90%;
-    transform: scale(0.9);
-    animation: modalPopUp 0.3s forwards;
-    z-index: 1001;
-}
-
-@keyframes modalPopUp {
-    100% {
-        transform: scale(1);
-    }
-}
-
-.modal-content h2 {
-    font-size: 1.1em;
-    color: #2ecc71;
-    margin-bottom: 20px;
-    text-shadow: 3px 3px 0 #27ae60;
-    animation: pixelBounce 0.6s infinite;
-}
-
-.modal-content .winner-info {
-    font-size: 0.6em;
-    margin: 20px 0;
-    line-height: 2;
-    color: #ecf0f1;
-}
-
-.modal-content .restart-btn {
-    /* Menggunakan style restart-btn yang sudah ada */
-    margin-top: 15px;
-    font-size: 0.6em;
-}
-
-
 
 /* ===========================
    RESPONSIVE - TABLET 
@@ -1163,41 +1103,40 @@ h1 i {
 
 /* ===========================
    LANDSCAPE MOBILE FIX
-   =========================== */
-@media (max-width: 768px) and (orientation: landscape) {
-    .game-container {
-        height: auto;
-        min-height: 100vh;
-    }
+   =========================== */@media (max-width: 768px) {
 
-    .game-layout {
-        padding: 55px 10px 10px 10px;
-    }
-
-    .board {
-        max-width: 50vh !important;
-        max-height: 50vh !important;
-    }
-
+    /* Player box jadi kolom agar kartu muncul di tengah */
     .player-info {
-        min-height: 70px;
-        padding: 6px;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 8px !important;
+        padding: 10px !important;
+        min-height: 120px !important;
     }
 
+    /* Header tetap di atas */
+    .player-header {
+        width: 100% !important;
+        align-items: center !important;
+        text-align: center !important;
+        flex-direction: column !important;
+        margin-bottom: 5px !important;
+    }
+
+    /* Hand berada di tengah */
     .hand {
-        padding: 8px 5px;
-        min-height: 55px;
+        width: 100% !important;
+        justify-content: center !important;
+        align-items: center !important;
         overflow-x: auto !important;
-        justify-content: flex-start !important; 
+        margin-top: 4px !important;
+        z-index: 50 !important;
     }
 
-    .card {
-        width: 28px;
-        height: 39px;
-    }
-
-    .card-back {
-        width: 28px;
-        height: 39px;
+    /* Kartu terlihat */
+    .card, .card-back {
+        z-index: 60 !important;
+        position: relative !important;
     }
 }

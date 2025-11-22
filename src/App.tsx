@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './App.css';
 
 // --- Placeholder Icon ---
@@ -196,6 +196,37 @@ const Board: React.FC<BoardProps> = ({ boardState, currentPlayerId, selectedCard
 };
 
 
+// --- KOMPONEN BARU: Winner Modal ---
+interface WinnerModalProps {
+    winnerId: number | null;
+    players: PyPlayer[];
+    colorClasses: string[];
+    onRestart: () => void;
+}
+
+const WinnerModal: React.FC<WinnerModalProps> = ({ winnerId, players, colorClasses, onRestart }) => {
+    const winner = players.find(p => p.id === winnerId);
+    const winnerName = winner ? winner.name : 'Permainan Seri';
+
+    return (
+        <div className="winner-modal-overlay">
+            <div className="winner-screen winner-modal">
+                <h2><Icon className="fas fa-trophy" /> {winnerId !== null ? 'SELAMAT!' : 'PERMAINAN SERI'} <Icon className="fas fa-trophy" /></h2>
+                <div 
+                    className="winner-info" 
+                    id="winnerInfo" 
+                    style={{color: winner ? colorClasses[winner.color_id] : 'white'}}
+                >
+                    {winnerName} telah memenangkan permainan!
+                </div>
+                <button className="restart-btn" onClick={onRestart}><Icon className="fas fa-redo" /> Main Lagi</button>
+            </div>
+        </div>
+    );
+};
+// ------------------------------------
+
+
 // --- Komponen Utama Game Punto (Frontend Controller) ---
 const PuntoGame: React.FC = () => {
     const [gameState, setGameState] = useState<'menu' | 'playing' | 'winner'>('menu');
@@ -299,7 +330,7 @@ const PuntoGame: React.FC = () => {
         }
     };
 
-    const requestAIMove = async () => {
+    const requestAIMove = useCallback(async () => {
         if (!gameData || gameData.gameOver || isThinking) return;
         
         // PERBAIKAN: Pemeriksaan defensif untuk gameId
@@ -328,19 +359,20 @@ const PuntoGame: React.FC = () => {
             setTimeout(() => {
                 setGameData(data);
                 setIsThinking(false);
-            }, 500); 
+            }, 10); 
             
         } catch (error) {
             console.error("Gagal meminta langkah AI:", error);
             setIsThinking(false);
         }
-    };
+    }, [gameData, gameId, isThinking]);
     
     // --- SIDE EFFECT (AI Turn & Game Over) ---
     useEffect(() => {
         if (gameData && !isThinking) {
             if (gameData.gameOver) {
-                setGameState('winner');
+                // Jangan ubah gameState, cukup biarkan modal tampil
+                // setGameState('winner'); // Hapus baris ini
             } else {
                 const currentPlayer = gameData.players.find(p => p.id === gameData.currentPlayerId);
                 // Hanya panggil AI jika giliran pemain saat ini adalah AI
@@ -349,7 +381,7 @@ const PuntoGame: React.FC = () => {
                 }
             }
         }
-    }, [gameData, isThinking]);
+    }, [gameData, isThinking, requestAIMove]);
 
     const handleRestart = () => {
         setGameState('menu'); 
@@ -548,19 +580,16 @@ const PuntoGame: React.FC = () => {
                         />
                     )}
                 </div>
-            </div>
-        );
-    } else if (gameState === 'winner' && gameData) { 
-        const winner = gameData.players.find(p => p.id === gameData.winnerId);
-        const winnerName = winner ? winner.name : 'Permainan Seri';
-
-        screenContent = (
-            <div id="winnerScreen" className="winner-screen">
-                <h2><Icon className="fas fa-trophy" /> {gameData.winnerId !== null ? 'SELAMAT!' : 'PERMAINAN SERI'} <Icon className="fas fa-trophy" /></h2>
-                <div className="winner-info" id="winnerInfo" style={{color: winner ? colorClasses[winner.color_id] : 'white'}}>
-                    {winnerName} telah memenangkan permainan!
-                </div>
-                <button className="restart-btn" onClick={handleRestart}><Icon className="fas fa-redo" /> Main Lagi</button>
+                
+                {/* Tampilkan modal jika game sudah selesai */}
+                {gameData.gameOver && (
+                    <WinnerModal
+                        winnerId={gameData.winnerId}
+                        players={gameData.players}
+                        colorClasses={colorClasses}
+                        onRestart={handleRestart}
+                    />
+                )}
             </div>
         );
     } else {

@@ -548,13 +548,46 @@ h1 i {
         -1px -1px 0 rgba(0,0,0,0.3);
 }
 
-.winner-screen {
+/* --- STYLE UNTUK WINNER MODAL BARU --- */
+
+.winner-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    /* Latar belakang transparan 50% */
+    background: rgba(0, 0, 0, 0.5); 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Pastikan di atas semua elemen game */
+}
+
+.winner-screen.winner-modal {
     text-align: center;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    height: 100%;
+    background: var(--pixel-light); /* Warna background modal */
+    border: 6px solid var(--pixel-border);
+    padding: 30px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+    max-width: 90%;
+    width: 450px;
+    animation: modalPop 0.3s ease-out;
+}
+
+@keyframes modalPop {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 .winner-screen h2 {
@@ -567,7 +600,7 @@ h1 i {
 
 @keyframes pixelBounce {
     0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
+    50% { transform: translateY(-5px); }
 }
 
 .winner-info {
@@ -608,6 +641,9 @@ h1 i {
     50% { transform: translateY(0) rotate(0deg); }
     75% { transform: translateY(-10px) rotate(5deg); }
 }
+/* --- AKHIR STYLE WINNER MODAL BARU --- */
+
+
 
 /* ===========================
    RESPONSIVE - TABLET 
@@ -982,6 +1018,12 @@ h1 i {
         z-index: 100;
     }
 
+    /* Modifikasi untuk modal di mobile */
+    .winner-screen.winner-modal {
+        padding: 20px;
+        width: 300px;
+    }
+
     .winner-screen h2 {
         font-size: 0.85em;
     }
@@ -1103,7 +1145,8 @@ h1 i {
 
 /* ===========================
    LANDSCAPE MOBILE FIX
-   =========================== */@media (max-width: 768px) {
+   =========================== */
+@media (max-width: 768px) {
 
     /* Player box jadi kolom agar kartu muncul di tengah */
     .player-info {

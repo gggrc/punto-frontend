@@ -285,6 +285,7 @@ h1 i {
 .player-info {
     background: #3d5368;
     padding: 6px 10px;
+    /* Border color kini dinamis, tetapi style normalnya default ke pixel-border */
     border: 3px solid var(--pixel-border);
     width: 100%;
     height: 100%;
@@ -304,8 +305,9 @@ h1 i {
 }
 
 .player-area.active .player-info {
-    border-color: #f39c12;
-    box-shadow: 0 0 15px rgba(241,196,15,0.5);
+    /* MENGHAPUS hardcode kuning. Border dan shadow dikendalikan oleh inline style di App.tsx */
+    /* border-color: #f39c12; */
+    /* box-shadow: 0 0 15px rgba(241,196,15,0.5); */
     transform: scale(1.02);
 }
 
@@ -1161,54 +1163,41 @@ h1 i {
 
 /* ===========================
    LANDSCAPE MOBILE FIX
-   =========================== */@media (max-width: 768px) {
+   =========================== */
+@media (max-width: 768px) and (orientation: landscape) {
+    .game-container {
+        height: auto;
+        min-height: 100vh;
+    }
 
-    /* Player box jadi kolom agar kartu muncul di tengah */
+    .game-layout {
+        padding: 55px 10px 10px 10px;
+    }
+
+    .board {
+        max-width: 50vh !important;
+        max-height: 50vh !important;
+    }
+
     .player-info {
-        flex-direction: column !important;
-        align-items: center !important;
-        justify-content: center !important;
-        gap: 8px !important;
-        padding: 10px !important;
-        min-height: 120px !important;
+        min-height: 70px;
+        padding: 6px;
     }
 
-    /* Header tetap di atas */
-    .player-header {
-        width: 100% !important;
-        align-items: center !important;
-        text-align: center !important;
-        flex-direction: column !important;
-        margin-bottom: 5px !important;
-    }
-
-    /* Hand berada di tengah */
     .hand {
-        width: 100% !important;
-        justify-content: center !important;
-        align-items: center !important;
+        padding: 8px 5px;
+        min-height: 55px;
         overflow-x: auto !important;
-        margin-top: 4px !important;
-        z-index: 50 !important;
+        justify-content: flex-start !important; 
     }
 
-    /* Kartu terlihat */
-    .card, .card-back {
-        z-index: 60 !important;
-        position: relative !important;
+    .card {
+        width: 28px;
+        height: 39px;
     }
 
-    .modal-content {
-        padding: 20px;
-    }
-    .modal-content h2 {
-        font-size: 0.8em;
-    }
-    .modal-content .winner-info {
-        font-size: 0.45em;
-    }
-    .modal-content .restart-btn {
-        font-size: 0.4em;
+    .card-back {
+        width: 28px;
+        height: 39px;
     }
 }
-

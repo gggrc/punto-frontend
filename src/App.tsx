@@ -3,6 +3,8 @@ import './App.css';
 
 // --- Placeholder Icon ---
 const Icon: React.FC<{ className: string }> = ({ className }) => {
+    // Di lingkungan nyata, ini akan menggunakan Font Awesome (fas fa-...)
+    // Kami menggunakan tag <i> untuk meniru styling dari App.css
     return <i className={className}></i>;
 };
 
@@ -35,6 +37,35 @@ interface GameState {
     players: PyPlayer[];
     gameOver: boolean;
 }
+
+// --- Komponen Modal Game Over ---
+interface GameOverModalProps {
+    gameData: GameState;
+    colorClasses: string[];
+    onRestart: () => void;
+}
+
+const GameOverModal: React.FC<GameOverModalProps> = ({ gameData, colorClasses, onRestart }) => {
+    if (!gameData.gameOver) return null;
+
+    const winner = gameData.players.find(p => p.id === gameData.winnerId);
+    const winnerName = winner ? winner.name : 'Permainan Seri';
+    const winnerColor = winner ? colorClasses[winner.color_id] : 'white';
+
+    return (
+        <div className="modal-overlay">
+            <div className="modal-content">
+                <h2><Icon className="fas fa-trophy" /> {gameData.winnerId !== null ? 'SELAMAT!' : 'PERMAINAN SERI'} <Icon className="fas fa-trophy" /></h2>
+                <div className="winner-info" style={{color: winnerColor}}>
+                    {winnerName} telah memenangkan permainan!
+                </div>
+                <button className="restart-btn" onClick={onRestart}><Icon className="fas fa-redo" /> Main Lagi</button>
+            </div>
+        </div>
+    );
+};
+// --- END Komponen Modal Game Over ---
+
 
 // --- Komponen Kartu ---
 interface CardProps {
@@ -102,7 +133,8 @@ const HiddenHand: React.FC<HiddenHandProps> = ({ cardCount }) => {
     return (
         <div className="hand">
             {Array(cardCount).fill(0).map((_, i) => (
-                <Card key={`hidden-card-${i}`} type="back" />
+                // Pastikan hanya kartu di tangan yang dihitung (maks 3)
+                i < 3 ? <Card key={`hidden-card-${i}`} type="back" /> : null
             ))}
         </div>
     );
@@ -126,6 +158,9 @@ const PlayerArea: React.FC<PlayerAreaProps> = ({
 }) => {
     const className = `player-area player-p${player.id + 1} ${isActive ? 'active' : ''}`;
     const cardColor = colorClasses[player.color_id];
+    
+    // Total kartu di tangan (untuk tampilan HiddenHand)
+    const handCardCount = player.hand.length > 0 ? player.hand.length : (player.total_cards > 0 ? 3 : 0);
 
     return (
         <div className={className} id={`playerArea${player.id}`}>
@@ -147,7 +182,8 @@ const PlayerArea: React.FC<PlayerAreaProps> = ({
                         canSelectCards={canSelectCards}
                     />
                 ) : (
-                    <HiddenHand cardCount={player.total_cards} />
+                    // Tampilkan kartu tertutup untuk AI atau pemain lain
+                    <HiddenHand cardCount={handCardCount} />
                 )}
             </div>
         </div>
@@ -166,13 +202,14 @@ const Board: React.FC<BoardProps> = ({ boardState, currentPlayerId, selectedCard
     const boardSize = 9;
     const cells = [];
     
-    const getIsClickable = (row: number, col: number, cell: PyCell | null, isFirstMove: boolean) => {
+    const getIsClickable = (row: number, col: number, cell: PyCell | null) => {
         if (selectedCardValue === null) return false;
         
         const isCenter = row === 4 && col === 4;
         const isEmpty = cell === null;
-        
-        if (isFirstMove) {
+        const isBoardEmpty = boardState.flat().every(c => c === null);
+
+        if (isBoardEmpty) {
             return isCenter;
         }
         
@@ -184,6 +221,7 @@ const Board: React.FC<BoardProps> = ({ boardState, currentPlayerId, selectedCard
             for (const [dr, dc] of directions) {
                 const nr = row + dr;
                 const nc = col + dc;
+                // Cek apakah posisi baru berada dalam batas dan memiliki kartu
                 if (nr >= 0 && nr < 9 && nc >= 0 && nc < 9 && boardState[nr][nc] !== null) {
                     return true;
                 }
@@ -191,16 +229,15 @@ const Board: React.FC<BoardProps> = ({ boardState, currentPlayerId, selectedCard
             return false;
         } 
         
+        // Aturan Stacking: Kartu sendiri tidak boleh ditumpuk, kartu baru harus lebih besar
         return cell!.player !== currentPlayerId && selectedCardValue! > cell!.value;
     };
     
-    const isBoardEmpty = boardState.flat().every(c => c === null);
-
     for (let row = 0; row < boardSize; row++) {
         for (let col = 0; col < boardSize; col++) {
             const cell = boardState[row][col];
             
-            const isClickable = getIsClickable(row, col, cell, isBoardEmpty);
+            const isClickable = getIsClickable(row, col, cell);
             
             let cellClassName = 'cell';
             if (isClickable) {
@@ -230,7 +267,7 @@ const Board: React.FC<BoardProps> = ({ boardState, currentPlayerId, selectedCard
 
 // --- Komponen Utama Game Punto ---
 const PuntoGame: React.FC = () => {
-    const [gameState, setGameState] = useState<'menu' | 'playing' | 'winner'>('menu');
+    const [gameState, setGameState] = useState<'menu' | 'playing'>('menu'); 
     const [gameData, setGameData] = useState<GameState | null>(null);
     const [gameId, setGameId] = useState<string | null>(null);
     const [selectedCardIndex, setSelectedCardIndex] = useState<number | null>(null);
@@ -343,6 +380,7 @@ const PuntoGame: React.FC = () => {
         const fetchUrl = API_URL === '/' ? `/${endpoint}` : `${API_BASE_URL}/${endpoint}`;
 
         try {
+            // Memicu permintaan ke backend untuk langkah AI
             const response = await fetch(fetchUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -353,10 +391,12 @@ const PuntoGame: React.FC = () => {
             
             const data: GameState = await response.json();
             
+            // --- KECEPATAN MUTLAK: Menampilkan Hasil Seketika (0ms) ---
+            // Menghilangkan semua delay buatan di frontend.
             setTimeout(() => {
                 setGameData(data);
                 setIsThinking(false);
-            }, 500); 
+            }, 0); // Delay 0ms
             
         } catch (error) {
             console.error("Gagal meminta langkah AI:", error);
@@ -368,11 +408,17 @@ const PuntoGame: React.FC = () => {
     useEffect(() => {
         if (gameData && !isThinking) {
             if (gameData.gameOver) {
-                setGameState('winner');
+                // Modal akan muncul berdasarkan gameData.gameOver
+                return; 
             } else {
                 const currentPlayer = gameData.players.find(p => p.id === gameData.currentPlayerId);
                 if (currentPlayer?.is_ai) {
-                    requestAIMove();
+                    // --- KECEPATAN MUTLAK: Memulai proses berpikir AI segera (0ms) ---
+                    const fastAiTimer = setTimeout(() => {
+                        requestAIMove();
+                    }, 0); // Delay 0ms
+                    
+                    return () => clearTimeout(fastAiTimer);
                 }
             }
         }
@@ -394,6 +440,7 @@ const PuntoGame: React.FC = () => {
     const updateNumPlayers = (change: number) => {
         setNumPlayersSelected(prev => {
             const newTotal = Math.min(4, Math.max(2, prev + change));
+            // Memastikan jumlah AI tidak melebihi total pemain - 1
             setNumAISelected(aiPrev => Math.min(newTotal - 1, aiPrev)); 
             return newTotal;
         });
@@ -486,17 +533,13 @@ const PuntoGame: React.FC = () => {
         
     } else if (gameState === 'playing' && gameData) {
         
-        const playersByPosition = [
-            gameData.players.find(p => p.id === 0),
-            gameData.players.find(p => p.id === 1),
-            gameData.players.find(p => p.id === 2),
-            gameData.players.find(p => p.id === 3),
-        ].filter(p => p !== undefined) as PyPlayer[];
+        // Posisikan pemain berdasarkan ID (0=Top, 1=Right, 2=Bottom, 3=Left)
+        const playersMap = new Map(gameData.players.map(p => [p.id, p]));
         
-        const topPlayer = playersByPosition.find(p => p.id === 0);
-        const rightPlayer = playersByPosition.find(p => p.id === 1);
-        const bottomPlayer = playersByPosition.find(p => p.id === 2);
-        const leftPlayer = playersByPosition.find(p => p.id === 3);
+        const topPlayer = playersMap.get(0);
+        const rightPlayer = playersMap.get(1);
+        const bottomPlayer = playersMap.get(2);
+        const leftPlayer = playersMap.get(3);
 
         screenContent = (
             <div id="gameScreen">
@@ -551,20 +594,14 @@ const PuntoGame: React.FC = () => {
                             canSelectCards={bottomPlayer.id === gameData.currentPlayerId && !bottomPlayer.is_ai}
                         />
                     )}
+                    
+                    {/* MODAL KEMENANGAN AKAN MUNCUL DI SINI */}
+                    <GameOverModal 
+                        gameData={gameData}
+                        colorClasses={colorClasses}
+                        onRestart={handleRestart}
+                    />
                 </div>
-            </div>
-        );
-    } else if (gameState === 'winner' && gameData) { 
-        const winner = gameData.players.find(p => p.id === gameData.winnerId);
-        const winnerName = winner ? winner.name : 'Permainan Seri';
-
-        screenContent = (
-            <div id="winnerScreen" className="winner-screen">
-                <h2><Icon className="fas fa-trophy" /> {gameData.winnerId !== null ? 'SELAMAT!' : 'PERMAINAN SERI'} <Icon className="fas fa-trophy" /></h2>
-                <div className="winner-info" id="winnerInfo" style={{color: winner ? colorClasses[winner.color_id] : 'white'}}>
-                    {winnerName} telah memenangkan permainan!
-                </div>
-                <button className="restart-btn" onClick={handleRestart}><Icon className="fas fa-redo" /> Main Lagi</button>
             </div>
         );
     } else {

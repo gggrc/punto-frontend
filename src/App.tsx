@@ -7,9 +7,8 @@ const Icon: React.FC<{ className: string }> = ({ className }) => {
 };
 
 // --- Konfigurasi API ---
-const API_URL = '/'; 
-const API_BASE_URL = import.meta.env.VITE_APP_API_URL || 'http://127.0.0.1:5000';
-
+// Menggunakan import.meta.env untuk konfigurasi lokal, default ke '' untuk Vercel rewrite.
+const API_BASE_URL = import.meta.env.VITE_APP_API_URL || ''; 
 
 const colorClasses = ['color-red', 'color-green', 'color-blue', 'color-yellow'];
 
@@ -225,6 +224,7 @@ const PuntoGame: React.FC = () => {
     // --- FUNGSI API ---
 
     const handleStartGame = async (numPlayers: number, numAI: number) => {
+        // NOTE: UNTUK GAME NORMAL, backend (/start_game) bertanggung jawab untuk mengacak kartu.
         if (numAI >= numPlayers) {
             alert("Jumlah AI harus kurang dari total pemain.");
             return;
@@ -238,7 +238,8 @@ const PuntoGame: React.FC = () => {
         setGameState('playing');
         
         const endpoint = 'start_game';
-        const fetchUrl = API_URL === '/' ? `/${endpoint}` : `${API_BASE_URL}/${endpoint}`;
+        // Logic Vercel/Proxy: Jika API_BASE_URL kosong (di Vercel), gunakan path relatif (/)
+        const fetchUrl = API_BASE_URL ? `${API_BASE_URL}/${endpoint}` : `/${endpoint}`;
 
         try {
             const response = await fetch(fetchUrl, {
@@ -280,7 +281,8 @@ const PuntoGame: React.FC = () => {
 
         setIsThinking(true);
         const endpoint = 'make_move';
-        const fetchUrl = API_URL === '/' ? `/${endpoint}` : `${API_BASE_URL}/${endpoint}`;
+        // Logic Vercel/Proxy: Jika API_BASE_URL kosong (di Vercel), gunakan path relatif (/)
+        const fetchUrl = API_BASE_URL ? `${API_BASE_URL}/${endpoint}` : `/${endpoint}`;
         
         try {
             const response = await fetch(fetchUrl, {
@@ -325,7 +327,8 @@ const PuntoGame: React.FC = () => {
 
         setIsThinking(true);
         const endpoint = 'ai_move';
-        const fetchUrl = API_URL === '/' ? `/${endpoint}` : `${API_BASE_URL}/${endpoint}`;
+        // Logic Vercel/Proxy: Jika API_BASE_URL kosong (di Vercel), gunakan path relatif (/)
+        const fetchUrl = API_BASE_URL ? `${API_BASE_URL}/${endpoint}` : `/${endpoint}`;
 
         try {
             const response = await fetch(fetchUrl, {
@@ -500,6 +503,7 @@ const PuntoGame: React.FC = () => {
                 
                 <p>
                     <Icon className="fas fa-info-circle" /> Semua logika ditenagai oleh Python API.
+                    <br/>**Kartu diacak di backend (/start_game).**
                 </p>
             </div>
         );

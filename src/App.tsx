@@ -93,18 +93,32 @@ const PlayerArea: React.FC<PlayerAreaProps> = ({ player, isActive, handContent }
     
     const hexColor = getHexColor(playerColorClass);
     
-    // Gaya Inline untuk Border dan Shadow Pemain Aktif
+    // Logika Border: Warna pemain jika AKTIF, Putih/Terang jika NON-AKTIF.
+    const borderColor = isActive ? hexColor : '#ecf0f1'; 
+    
     const activeStyle = isActive 
         ? { 
-            borderColor: hexColor, 
+            borderColor: borderColor, 
             boxShadow: `0 0 15px ${hexColor}`,
+            transform: 'scale(1.02)'
           } 
-        : {};
+        : {
+            borderColor: borderColor, 
+            boxShadow: 'none',
+            transform: 'none'
+        };
+
+    // Style inline untuk Player Info
+    const playerInfoStyle = { 
+        ...activeStyle 
+    };
 
     return (
         <div className={className} id={`playerArea${player.id}`}>
-            {/* Menerapkan warna border normal (default di CSS), color nama, dan activeStyle */}
-            <div className="player-info" style={{ borderColor: hexColor, ...activeStyle }}>
+            <div 
+                className="player-info" 
+                style={playerInfoStyle}
+            >
                 <div className="player-header">
                     <span className="player-name" style={{ color: hexColor }}>{player.name}</span>
                     <span className="cards-left">{player.total_cards} Kartu</span>
@@ -194,37 +208,6 @@ const Board: React.FC<BoardProps> = ({ boardState, currentPlayerId, selectedCard
         </div>
     );
 };
-
-
-// --- KOMPONEN BARU: Winner Modal ---
-interface WinnerModalProps {
-    winnerId: number | null;
-    players: PyPlayer[];
-    colorClasses: string[];
-    onRestart: () => void;
-}
-
-const WinnerModal: React.FC<WinnerModalProps> = ({ winnerId, players, colorClasses, onRestart }) => {
-    const winner = players.find(p => p.id === winnerId);
-    const winnerName = winner ? winner.name : 'Permainan Seri';
-
-    return (
-        <div className="winner-modal-overlay">
-            <div className="winner-screen winner-modal">
-                <h2><Icon className="fas fa-trophy" /> {winnerId !== null ? 'SELAMAT!' : 'PERMAINAN SERI'} <Icon className="fas fa-trophy" /></h2>
-                <div 
-                    className="winner-info" 
-                    id="winnerInfo" 
-                    style={{color: winner ? colorClasses[winner.color_id] : 'white'}}
-                >
-                    {winnerName} telah memenangkan permainan!
-                </div>
-                <button className="restart-btn" onClick={onRestart}><Icon className="fas fa-redo" /> Main Lagi</button>
-            </div>
-        </div>
-    );
-};
-// ------------------------------------
 
 
 // --- Komponen Utama Game Punto (Frontend Controller) ---
@@ -355,11 +338,8 @@ const PuntoGame: React.FC = () => {
             
             const data: GameState = await response.json();
             
-            // Tambahkan delay kecil untuk efek "berpikir}
-            setTimeout(() => {
-                setGameData(data);
-                setIsThinking(false);
-            }, 10); 
+            setGameData(data);
+            setIsThinking(false);
             
         } catch (error) {
             console.error("Gagal meminta langkah AI:", error);
@@ -371,12 +351,12 @@ const PuntoGame: React.FC = () => {
     useEffect(() => {
         if (gameData && !isThinking) {
             if (gameData.gameOver) {
-                // Jangan ubah gameState, cukup biarkan modal tampil
-                // setGameState('winner'); // Hapus baris ini
+                // Tidak perlu mengubah state, hanya menampilkan winner
             } else {
                 const currentPlayer = gameData.players.find(p => p.id === gameData.currentPlayerId);
                 // Hanya panggil AI jika giliran pemain saat ini adalah AI
                 if (currentPlayer?.is_ai) {
+                    // Karena AI sekarang sangat cepat (0.5s), panggilan akan segera kembali
                     requestAIMove();
                 }
             }
@@ -416,10 +396,39 @@ const PuntoGame: React.FC = () => {
     // ---------------------------------
     
     const currentPlayer = gameData?.players.find(p => p.id === gameData?.currentPlayerId);
-    const currentPlayerHand = (currentPlayer && !currentPlayer.is_ai) ? currentPlayer.hand : [];
-    const selectedCardValue = selectedCardIndex !== null ? currentPlayerHand[selectedCardIndex] : null;
-
+    const selectedCardValue = selectedCardIndex !== null && currentPlayer && currentPlayer.hand.length > selectedCardIndex ? currentPlayer.hand[selectedCardIndex] : null;
+    
     // --- RENDER LOGIC ---
+    
+    const getWinnerMessage = () => {
+        if (!gameData || !gameData.gameOver) return null;
+
+        const winner = gameData.players.find(p => p.id === gameData.winnerId);
+        
+        if (winner) {
+            const colorClass = colorClasses[winner.color_id];
+            const winnerName = winner.name;
+            return (
+                <div 
+                    className={`winner-message ${colorClass}`} 
+                    onClick={handleRestart}
+                >
+                    <Icon className="fas fa-trophy" /> {winnerName.toUpperCase()} MENANG! (KLIK UNTUK MENU)
+                </div>
+            );
+        } else if (gameData.gameOver) {
+            return (
+                <div 
+                    className="winner-message color-text"
+                    onClick={handleRestart}
+                >
+                    <Icon className="fas fa-handshake" /> PERMAINAN SERI! (KLIK UNTUK MENU)
+                </div>
+            );
+        }
+        return null;
+    }
+
     let screenContent;
 
     if (gameState === 'menu') {
@@ -507,21 +516,23 @@ const PuntoGame: React.FC = () => {
         const renderHand = (player: PyPlayer) => {
             const playerColorClass = colorClasses[player.color_id]; 
             
-            if (player.id === gameData.currentPlayerId && !player.is_ai) {
-                // Tampilkan kartu jika giliran pemain manusia
-                return player.hand.map((card_value, index) => (
+            // Logika: Tampilkan kartu hanya jika gilirannya (karena backend hanya mengirimnya saat itu)
+            if (player.hand && player.hand.length > 0) {
+                 return player.hand.map((card_value, index) => (
                     <Card 
                         key={index} 
                         type="hand" 
                         value={card_value} 
                         colorClass={playerColorClass} 
-                        isSelected={selectedCardIndex === index}
-                        onClick={() => handleCardSelect(index)}
+                        // Kartu manusia aktif yang dipilih
+                        isSelected={!player.is_ai && player.id === gameData.currentPlayerId && selectedCardIndex === index}
+                        onClick={!player.is_ai && player.id === gameData.currentPlayerId ? () => handleCardSelect(index) : undefined}
                     />
                 ));
             } else {
-                // Tampilkan kartu belakang untuk pemain lain atau AI
-                return Array(player.total_cards).fill(0).map((_, i) => <Card key={i} type="back" />);
+                // Sisa kartu disembunyikan
+                const cardsHidden = player.total_cards;
+                return Array(cardsHidden).fill(0).map((_, i) => <Card key={i} type="back" />);
             }
         };
 
@@ -529,12 +540,11 @@ const PuntoGame: React.FC = () => {
         const rightPlayer = playersByPosition.find(p => p.id === 1);
         const bottomPlayer = playersByPosition.find(p => p.id === 2);
         const leftPlayer = playersByPosition.find(p => p.id === 3);
-
+        
         screenContent = (
             <div id="gameScreen">
-                <div id="aiThinking" className="ai-thinking" style={{ display: isThinking && currentPlayer?.is_ai ? 'block' : 'none' }}>
-                    <Icon className="fas fa-robot" /> AI sedang berpikir...
-                </div>
+                
+                {/* Hapus rendering aiLogBox dan ai-thinking-overlay */}
 
                 <div className="game-layout">
                     {/* P1 - Atas */}
@@ -580,16 +590,6 @@ const PuntoGame: React.FC = () => {
                         />
                     )}
                 </div>
-                
-                {/* Tampilkan modal jika game sudah selesai */}
-                {gameData.gameOver && (
-                    <WinnerModal
-                        winnerId={gameData.winnerId}
-                        players={gameData.players}
-                        colorClasses={colorClasses}
-                        onRestart={handleRestart}
-                    />
-                )}
             </div>
         );
     } else {
@@ -606,6 +606,8 @@ const PuntoGame: React.FC = () => {
             <div className="top-bar-container">
                 <div className="header-info-group">
                     <h1><Icon className="fas fa-bullseye" /> PUNTO</h1>
+                    {/* Tampilkan pesan pemenang/seri di sini */}
+                    {getWinnerMessage()} 
                 </div>
             </div>
             

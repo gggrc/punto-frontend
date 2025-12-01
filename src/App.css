@@ -80,63 +80,6 @@ h1 i {
     color: #f39c12;
 }
 
-/* --- STYLE PESAN PEMENANG (POJOK KANAN ATAS) --- */
-.winner-message {
-    position: fixed; 
-    top: 15px; /* Sesuaikan agar di kanan atas */
-    right: 15px;
-    left: auto;
-    transform: none; /* Nonaktifkan transform X */
-    z-index: 1000;
-    padding: 12px 25px; /* Padding lebih besar agar lebih jelas */
-    font-size: 0.65em; 
-    font-weight: bold;
-    color: white; /* Warna teks putih untuk kontras */
-    border: 4px solid;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7); /* Shadow putih terang */
-    cursor: pointer;
-    text-shadow: 2px 2px 0 rgba(0,0,0,0.5); /* Teks shadow hitam untuk keterbacaan */
-    animation: flashWinner 1s infinite;
-}
-
-.winner-message.color-red {
-    background: #c0392b; /* Warna gelap agar teks putih terbaca */
-    border-color: #e74c3c;
-}
-
-.winner-message.color-green {
-    background: #27ae60;
-    border-color: #2ecc71;
-}
-
-.winner-message.color-blue {
-    background: #2980b9;
-    border-color: #3498db;
-}
-
-.winner-message.color-yellow {
-    background: #f39c12;
-    border-color: #f1c40f;
-    color: #2c3e50; /* Teks hitam untuk warna kuning */
-}
-
-.winner-message.color-text { /* Untuk Seri/Draw */
-    background: #7f8c8d;
-    border-color: #95a5a6;
-    color: white;
-}
-
-@keyframes flashWinner {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.9; }
-}
-
-/* --- HAPUS style .ai-thinking yang mengganggu di sini --- */
-.ai-thinking {
-    display: none;
-}
-/* --- SISA STYLE CSS TETAP SAMA SEBELUMNYA --- */
-
 .setup-screen {
     text-align: center;
     display: flex;
@@ -259,6 +202,26 @@ h1 i {
     box-shadow: inset 0 -3px 0 rgba(0,0,0,0.3);
 }
 
+.ai-thinking {
+    text-align: center;
+    padding: 8px;
+    background: #f39c12;
+    border: 3px solid #e67e22;
+    font-size: 0.5em;
+    color: #2c3e50;
+    animation: pixelThinking 1s infinite;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 100;
+}
+
+@keyframes pixelThinking {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
 .game-layout {
     flex: 1;
     display: flex;
@@ -340,6 +303,11 @@ h1 i {
     padding: 10px 6px;
 }
 
+.player-area.active .player-info {
+    border-color: #f39c12;
+    box-shadow: 0 0 15px rgba(241,196,15,0.5);
+    transform: scale(1.02);
+}
 
 .player-header {
     display: flex;
@@ -580,64 +548,7 @@ h1 i {
         -1px -1px 0 rgba(0,0,0,0.3);
 }
 
-/* --- STYLE PESAN PEMENANG (POJOK KANAN ATAS) --- */
-.winner-message {
-    position: fixed; 
-    top: 15px; /* Sesuaikan agar di kanan atas */
-    right: 15px;
-    left: auto;
-    transform: none; /* Nonaktifkan transform X */
-    z-index: 1000;
-    padding: 12px 25px; /* Padding lebih besar agar lebih jelas */
-    font-size: 0.65em; 
-    font-weight: bold;
-    color: white; /* Warna teks putih untuk kontras */
-    border: 4px solid;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7); /* Shadow putih terang */
-    cursor: pointer;
-    text-shadow: 2px 2px 0 rgba(0,0,0,0.5); /* Teks shadow hitam untuk keterbacaan */
-    animation: flashWinner 1s infinite;
-}
-
-.winner-message.color-red {
-    background: #c0392b; /* Warna gelap agar teks putih terbaca */
-    border-color: #e74c3c;
-}
-
-.winner-message.color-green {
-    background: #27ae60;
-    border-color: #2ecc71;
-}
-
-.winner-message.color-blue {
-    background: #2980b9;
-    border-color: #3498db;
-}
-
-.winner-message.color-yellow {
-    background: #f39c12;
-    border-color: #f1c40f;
-    color: #2c3e50; /* Teks hitam untuk warna kuning */
-}
-
-.winner-message.color-text { /* Untuk Seri/Draw */
-    background: #7f8c8d;
-    border-color: #95a5a6;
-    color: white;
-}
-
-@keyframes flashWinner {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.9; }
-}
-
-/* --- HAPUS style .ai-thinking yang mengganggu di sini --- */
-.ai-thinking {
-    display: none;
-}
-/* --- SISA STYLE CSS TETAP SAMA SEBELUMNYA --- */
-
-.setup-screen {
+.winner-screen {
     text-align: center;
     display: flex;
     flex-direction: column;
@@ -646,936 +557,657 @@ h1 i {
     height: 100%;
 }
 
-.setup-screen h2 {
-    color: #ecf0f1;
-    font-size: 1em;
+.winner-screen h2 {
+    font-size: 1.2em;
+    color: #2ecc71;
     margin-bottom: 20px;
+    animation: pixelBounce 0.6s infinite;
+    text-shadow: 3px 3px 0 #27ae60;
 }
 
-.player-config-controls {
-    display: flex;
-    gap: 30px;
-    margin: 30px 0;
-    flex-direction: row; 
-    align-items: flex-start;
+@keyframes pixelBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
 }
 
-.config-group {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-}
-
-.config-group label {
-    font-size: 0.5em;
+.winner-info {
+    font-size: 0.6em;
+    margin: 20px 0;
     color: #ecf0f1;
-    text-shadow: 1px 1px 0 #1a252f;
+    line-height: 2;
 }
 
-.value-control {
-    display: flex;
-    align-items: center;
-    gap: 4px; 
-}
-
-.value-display {
-    padding: 10px 15px;
+.restart-btn {
+    padding: 15px 30px;
     font-size: 0.7em;
     font-family: 'Press Start 2P', cursive;
-    background: #3d5368;
-    color: #ecf0f1;
-    border: 4px solid var(--pixel-border);
-    box-shadow: inset 0 -4px 0 rgba(0,0,0,0.3);
-    min-width: 120px; 
-    text-align: center;
-}
-
-.control-btn {
-    width: 35px;
-    height: 35px;
-    font-size: 1.2em; 
-    font-family: 'Press Start 2P', cursive;
-    background: #e74c3c;
+    background: #3498db;
     color: white;
-    border: 4px solid #c0392b;
+    border: 4px solid #2980b9;
     cursor: pointer;
-    box-shadow: inset 0 -4px 0 #c0392b;
+    box-shadow: inset 0 -4px 0 #2980b9;
     transition: all 0.1s;
-    display: flex;
+    display: inline-flex;
     align-items: center;
-    justify-content: center;
-    padding: 0;
-    line-height: 0.8; 
-}
-
-.control-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: inset 0 -3px 0 #c0392b;
-}
-
-.control-btn:active {
-    transform: translateY(1px);
-    box-shadow: inset 0 0 0 #c0392b;
-}
-
-.control-btn:disabled {
-    background: #7f8c8d;
-    border-color: #5d6d7e;
-    box-shadow: inset 0 -4px 0 #5d6d7e;
-    cursor: not-allowed;
-    transform: none;
-}
-
-.setup-screen p {
-    font-size: 0.5em;
-    line-height: 2;
-    color: #95a5a6;
-}
-
-#gameScreen {
-    display: grid;
-    grid-template-areas:
-        "header"
-        "main";
-    grid-template-rows: auto 1fr;
-    height: 100%;
-    width: 100%;
-    position: relative;
-}
-
-.game-info {
-    display: flex;
     gap: 10px;
-    margin-top: 5px;
 }
 
-.info-box {
-    background: #3d5368;
-    padding: 5px 10px;
-    border: 3px solid var(--pixel-border);
-    font-size: 0.4em;
-    color: #ecf0f1;
-    box-shadow: inset 0 -3px 0 rgba(0,0,0,0.3);
+.restart-btn:hover {
+    transform: translateY(2px);
+    box-shadow: inset 0 -2px 0 #2980b9;
 }
 
-.game-layout {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 0;
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
+.restart-btn:active {
+    transform: translateY(4px);
+    box-shadow: inset 0 0 0 #2980b9;
 }
 
-.player-area {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: absolute;
-    z-index: 5;
+@keyframes shuffle {
+    0%, 100% { transform: translateY(0); }
+    25% { transform: translateY(-10px) rotate(-5deg); }
+    50% { transform: translateY(0) rotate(0deg); }
+    75% { transform: translateY(-10px) rotate(5deg); }
 }
 
-/* Posisi player area - Desktop */
-.player-area.player-p1 {
-    top: 5px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    max-width: 400px; 
-    height: 90px;
-    z-index: 6;
-}
+/* --- Modal Styling --- */
 
-.player-area.player-p2 {
-    right: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 100px;
-    height: 320px;
-    z-index: 7;
-}
-
-.player-area.player-p3 {
-    bottom: 0px; 
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    max-width: 400px; 
-    height: 90px;
-    z-index: 8;
-}
-
-.player-area.player-p4 {
-    left: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 100px;
-    height: 320px;
-    z-index: 9;
-}
-
-.player-info {
-    background: #3d5368;
-    padding: 6px 10px;
-    border: 3px solid var(--pixel-border);
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    box-shadow: inset 0 -3px 0 rgba(0,0,0,0.3);
-    transition: all 0.2s;
-    position: relative;
-    z-index: 10;
-}
-
-.player-area.player-p2 .player-info,
-.player-area.player-p4 .player-info {
-    align-items: center;
-    justify-content: flex-start;
-    padding: 10px 6px;
-}
-
-
-.player-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 6px;
-    font-size: 0.38em;
-    width: 100%;
-    flex-shrink: 0;
-    z-index: 11;
-}
-
-.player-area.player-p2 .player-header,
-.player-area.player-p4 .player-header {
-    flex-direction: column;
-    text-align: center;
-    margin-bottom: 10px;
-    gap: 4px;
-}
-
-.player-area.player-p2 .cards-left,
-.player-area.player-p4 .cards-left {
-    margin-top: 0;
-    z-index: 20;
-}
-
-.player-name {
-    color: #ecf0f1;
-    font-weight: bold;
-}
-
-.cards-left {
-    background: var(--pixel-border);
-    color: #ecf0f1;
-    padding: 3px 6px;
-    font-size: 0.8em;
-    border: 2px solid #000;
-    flex-shrink: 0;
-}
-
-.hand {
-    display: flex;
-    gap: 5px;
-    flex-wrap: nowrap;
-    flex: 1;
-    align-items: center;
-    justify-content: flex-start;
-    overflow-x: auto;
-    overflow-y: visible;
-    padding: 5px 5px;
-    min-height: 0;
-    z-index: 30;
-    position: relative;
-}
-
-/* Memastikan kartu di area vertikal (desktop/tablet) terlihat */
-.player-area.player-p2 .hand,
-.player-area.player-p4 .hand {
-    flex-direction: column;
-    align-items: center;
-    justify-content: center; 
-    gap: 8px;
-    overflow-y: hidden; 
-    overflow-x: hidden;
-    z-index: 30;
-}
-
-.card {
-    width: 38px;
-    height: 52px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    font-weight: bold;
-    color: white;
-    cursor: pointer;
-    border: 2px solid rgba(0,0,0,0.4);
-    box-shadow: inset 0 -4px 0 rgba(0,0,0,0.3);
-    text-shadow: 2px 2px 0 rgba(0,0,0,0.5);
-    transition: all 0.1s;
-    position: relative;
-    flex-shrink: 0;
-    z-index: 41;
-}
-
-.card::before {
-    content: '';
+.modal-overlay {
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    height: 3px;
-    background: rgba(255,255,255,0.3);
-}
-
-.card:hover {
-    transform: translateY(-3px);
-}
-
-.card.selected {
-    transform: translateY(-5px) scale(1.1);
-    box-shadow: 0 0 15px rgba(241,196,15,0.8);
-    border-color: #f1c40f;
-    animation: pixelSelected 0.8s infinite;
-    z-index: 22;
-}
-
-@keyframes pixelSelected {
-    0%, 100% {
-        box-shadow: 0 0 15px rgba(241,196,15,0.8);
-    }
-    50% {
-        box-shadow: 0 0 25px rgba(243,156,18,1);
-    }
-}
-
-.card-back {
-    width: 38px;
-    height: 52px;
-    background: linear-gradient(135deg, #3d5368 0%, #354b5e 100%);
-    border: 2px solid #1a252f;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5); /* Latar belakang gelap transparan */
     display: flex;
-    align-items: center;
     justify-content: center;
-    font-size: 20px;
-    color: #7f8c8d;
-    box-shadow: inset 0 -4px 0 rgba(0,0,0,0.3);
-    flex-shrink: 0;
-    z-index: 21;
-}
-
-.card-back::before {
-    content: '?';
-}
-
-.board-container {
-    display: flex;
     align-items: center;
-    justify-content: center;
-    min-height: 0;
-    flex: 1;
-    padding-bottom: 0px;
-    z-index: 3;
+    z-index: 1000; /* Pastikan di atas semua elemen game */
+    backdrop-filter: blur(4px);
 }
 
-.board {
-    display: grid;
-    grid-template-columns: repeat(9, 1fr);
-    grid-template-rows: repeat(9, 1fr);
-    gap: 2px;
-    background: var(--pixel-border);
-    padding: 2px;
-    border: 4px solid var(--pixel-border);
-    border-bottom: 6px solid var(--pixel-border);
-    aspect-ratio: 1;
-    max-height: calc(100vh - 220px); 
-    max-width: calc(100vw - 300px);
-    width: min(58vh, 58vw);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-    z-index: 4;
-}
-
-.cell {
+.modal-content {
     background: #3d5368;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    cursor: pointer;
-    border: 1px solid #354b5e;
-    aspect-ratio: 1;
-    transition: all 0.1s;
-    position: relative;
-}
-
-.cell:hover {
-    background: #4a6379;
-}
-
-.cell.valid-move {
-    background: #f39c12;
-    box-shadow: 0 0 10px rgba(241,196,15,0.6);
-    animation: pixelPulse 1s infinite;
-}
-
-@keyframes pixelPulse {
-    0%, 100% { 
-        box-shadow: 0 0 10px rgba(241,196,15,0.6);
-    }
-    50% { 
-        box-shadow: 0 0 20px rgba(241,196,15,0.9);
-    }
-}
-
-.card-on-board {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: clamp(10px, 1.5vw, 16px);
-    font-weight: bold;
-    text-shadow: 2px 2px 0 rgba(0,0,0,0.5);
-    box-shadow: inset 0 -3px 0 rgba(0,0,0,0.3);
-    border: 2px solid rgba(0,0,0,0.3);
-    position: relative;
-}
-
-.card-on-board::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: rgba(255,255,255,0.3);
-}
-
-.color-red, .card.color-red { 
-    background: linear-gradient(180deg, #e74c3c 0%, #c0392b 100%);
-}
-
-.color-green, .card.color-green { 
-    background: linear-gradient(180deg, #2ecc71 0%, #27ae60 100%);
-}
-
-.color-blue, .card.color-blue { 
-    background: linear-gradient(180deg, #3498db 0%, #2980b9 100%);
-}
-
-.color-yellow, .card.color-yellow { 
-    background: linear-gradient(180deg, #f1c40f 0%, #f39c12 100%);
-    color: #2c3e50;
-    text-shadow: 
-        1px 1px 0 rgba(255,255,255,0.5),
-        -1px -1px 0 rgba(0,0,0,0.3);
-}
-
-/* --- STYLE PESAN PEMENANG (POJOK KANAN ATAS) --- */
-.winner-message {
-    position: fixed; 
-    top: 15px; /* Sesuaikan agar di kanan atas */
-    right: 15px;
-    left: auto;
-    transform: none; /* Nonaktifkan transform X */
-    z-index: 1000;
-    padding: 12px 25px; /* Padding lebih besar agar lebih jelas */
-    font-size: 0.65em; 
-    font-weight: bold;
-    color: white; /* Warna teks putih untuk kontras */
-    border: 4px solid;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7); /* Shadow putih terang */
-    cursor: pointer;
-    text-shadow: 2px 2px 0 rgba(0,0,0,0.5); /* Teks shadow hitam untuk keterbacaan */
-    animation: flashWinner 1s infinite;
-}
-
-.winner-message.color-red {
-    background: #c0392b; /* Warna gelap agar teks putih terbaca */
-    border-color: #e74c3c;
-}
-
-.winner-message.color-green {
-    background: #27ae60;
-    border-color: #2ecc71;
-}
-
-.winner-message.color-blue {
-    background: #2980b9;
-    border-color: #3498db;
-}
-
-.winner-message.color-yellow {
-    background: #f39c12;
-    border-color: #f1c40f;
-    color: #2c3e50; /* Teks hitam untuk warna kuning */
-}
-
-.winner-message.color-text { /* Untuk Seri/Draw */
-    background: #7f8c8d;
-    border-color: #95a5a6;
-    color: white;
-}
-
-@keyframes flashWinner {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.9; }
-}
-
-/* --- HAPUS style .ai-thinking yang mengganggu di sini --- */
-.ai-thinking {
-    display: none;
-}
-/* --- SISA STYLE CSS TETAP SAMA SEBELUMNYA --- */
-
-.setup-screen {
+    padding: 30px;
+    border: 6px solid #f39c12; /* Border kuning untuk kemenangan */
+    box-shadow: 0 0 20px rgba(241, 196, 15, 0.8);
     text-align: center;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
+    max-width: 400px;
+    width: 90%;
+    transform: scale(0.9);
+    animation: modalPopUp 0.3s forwards;
+    z-index: 1001;
 }
 
-.setup-screen h2 {
-    color: #ecf0f1;
-    font-size: 1em;
+@keyframes modalPopUp {
+    100% {
+        transform: scale(1);
+    }
+}
+
+.modal-content h2 {
+    font-size: 1.1em;
+    color: #2ecc71;
     margin-bottom: 20px;
+    text-shadow: 3px 3px 0 #27ae60;
+    animation: pixelBounce 0.6s infinite;
 }
 
-.player-config-controls {
-    display: flex;
-    gap: 30px;
-    margin: 30px 0;
-    flex-direction: row; 
-    align-items: flex-start;
-}
-
-.config-group {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-}
-
-.config-group label {
-    font-size: 0.5em;
-    color: #ecf0f1;
-    text-shadow: 1px 1px 0 #1a252f;
-}
-
-.value-control {
-    display: flex;
-    align-items: center;
-    gap: 4px; 
-}
-
-.value-display {
-    padding: 10px 15px;
-    font-size: 0.7em;
-    font-family: 'Press Start 2P', cursive;
-    background: #3d5368;
-    color: #ecf0f1;
-    border: 4px solid var(--pixel-border);
-    box-shadow: inset 0 -4px 0 rgba(0,0,0,0.3);
-    min-width: 120px; 
-    text-align: center;
-}
-
-.control-btn {
-    width: 35px;
-    height: 35px;
-    font-size: 1.2em; 
-    font-family: 'Press Start 2P', cursive;
-    background: #e74c3c;
-    color: white;
-    border: 4px solid #c0392b;
-    cursor: pointer;
-    box-shadow: inset 0 -4px 0 #c0392b;
-    transition: all 0.1s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    line-height: 0.8; 
-}
-
-.control-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: inset 0 -3px 0 #c0392b;
-}
-
-.control-btn:active {
-    transform: translateY(1px);
-    box-shadow: inset 0 0 0 #c0392b;
-}
-
-.control-btn:disabled {
-    background: #7f8c8d;
-    border-color: #5d6d7e;
-    box-shadow: inset 0 -4px 0 #5d6d7e;
-    cursor: not-allowed;
-    transform: none;
-}
-
-.setup-screen p {
-    font-size: 0.5em;
+.modal-content .winner-info {
+    font-size: 0.6em;
+    margin: 20px 0;
     line-height: 2;
-    color: #95a5a6;
-}
-
-#gameScreen {
-    display: grid;
-    grid-template-areas:
-        "header"
-        "main";
-    grid-template-rows: auto 1fr;
-    height: 100%;
-    width: 100%;
-    position: relative;
-}
-
-.game-info {
-    display: flex;
-    gap: 10px;
-    margin-top: 5px;
-}
-
-.info-box {
-    background: #3d5368;
-    padding: 5px 10px;
-    border: 3px solid var(--pixel-border);
-    font-size: 0.4em;
     color: #ecf0f1;
-    box-shadow: inset 0 -3px 0 rgba(0,0,0,0.3);
 }
 
-.game-layout {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 0;
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    top: 0;
-    left: 0;
-}
-
-.player-area {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: absolute;
-    z-index: 5;
-}
-
-/* Posisi player area - Desktop */
-.player-area.player-p1 {
-    top: 5px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    max-width: 400px; 
-    height: 90px;
-    z-index: 6;
-}
-
-.player-area.player-p2 {
-    right: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 100px;
-    height: 320px;
-    z-index: 7;
-}
-
-.player-area.player-p3 {
-    bottom: 0px; 
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    max-width: 400px; 
-    height: 90px;
-    z-index: 8;
-}
-
-.player-area.player-p4 {
-    left: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 100px;
-    height: 320px;
-    z-index: 9;
-}
-
-.player-info {
-    background: #3d5368;
-    padding: 6px 10px;
-    border: 3px solid var(--pixel-border);
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    box-shadow: inset 0 -3px 0 rgba(0,0,0,0.3);
-    transition: all 0.2s;
-    position: relative;
-    z-index: 10;
-}
-
-.player-area.player-p2 .player-info,
-.player-area.player-p4 .player-info {
-    align-items: center;
-    justify-content: flex-start;
-    padding: 10px 6px;
+.modal-content .restart-btn {
+    /* Menggunakan style restart-btn yang sudah ada */
+    margin-top: 15px;
+    font-size: 0.6em;
 }
 
 
-.player-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 6px;
-    font-size: 0.38em;
-    width: 100%;
-    flex-shrink: 0;
-    z-index: 11;
-}
 
-.player-area.player-p2 .player-header,
-.player-area.player-p4 .player-header {
-    flex-direction: column;
-    text-align: center;
-    margin-bottom: 10px;
-    gap: 4px;
-}
-
-.player-area.player-p2 .cards-left,
-.player-area.player-p4 .cards-left {
-    margin-top: 0;
-    z-index: 20;
-}
-
-.player-name {
-    color: #ecf0f1;
-    font-weight: bold;
-}
-
-.cards-left {
-    background: var(--pixel-border);
-    color: #ecf0f1;
-    padding: 3px 6px;
-    font-size: 0.8em;
-    border: 2px solid #000;
-    flex-shrink: 0;
-}
-
-.hand {
-    display: flex;
-    gap: 5px;
-    flex-wrap: nowrap;
-    flex: 1;
-    align-items: center;
-    justify-content: flex-start;
-    overflow-x: auto;
-    overflow-y: visible;
-    padding: 5px 5px;
-    min-height: 0;
-    z-index: 30;
-    position: relative;
-}
-
-/* Memastikan kartu di area vertikal (desktop/tablet) terlihat */
-.player-area.player-p2 .hand,
-.player-area.player-p4 .hand {
-    flex-direction: column;
-    align-items: center;
-    justify-content: center; 
-    gap: 8px;
-    overflow-y: hidden; 
-    overflow-x: hidden;
-    z-index: 30;
-}
-
-.card {
-    width: 38px;
-    height: 52px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    font-weight: bold;
-    color: white;
-    cursor: pointer;
-    border: 2px solid rgba(0,0,0,0.4);
-    box-shadow: inset 0 -4px 0 rgba(0,0,0,0.3);
-    text-shadow: 2px 2px 0 rgba(0,0,0,0.5);
-    transition: all 0.1s;
-    position: relative;
-    flex-shrink: 0;
-    z-index: 41;
-}
-
-.card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: rgba(255,255,255,0.3);
-}
-
-.card:hover {
-    transform: translateY(-3px);
-}
-
-.card.selected {
-    transform: translateY(-5px) scale(1.1);
-    box-shadow: 0 0 15px rgba(241,196,15,0.8);
-    border-color: #f1c40f;
-    animation: pixelSelected 0.8s infinite;
-    z-index: 22;
-}
-
-@keyframes pixelSelected {
-    0%, 100% {
-        box-shadow: 0 0 15px rgba(241,196,15,0.8);
+/* ===========================
+   RESPONSIVE - TABLET 
+   =========================== */
+@media (max-width: 1024px) {
+    h1 {
+        font-size: 1.1em;
     }
-    50% {
-        box-shadow: 0 0 25px rgba(243,156,18,1);
+
+    .top-bar-container {
+        top: 12px;
+        left: 12px;
+    }
+
+    /* Setup screen adjustments */
+    .setup-screen h2 {
+        font-size: 0.85em;
+    }
+
+    .player-config-controls {
+        gap: 25px;
+        margin: 25px 0;
+    }
+
+    .config-group label {
+        font-size: 0.45em;
+    }
+
+    .value-display {
+        min-width: 110px;
+        padding: 9px 13px;
+        font-size: 0.65em;
+    }
+
+    .control-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 1.1em;
+    }
+
+    /* Player areas - Tablet */
+    .player-area.player-p1 { 
+        height: 80px;
+        top: 2px;
+        max-width: 380px;
+    }
+
+    .player-area.player-p2 { 
+        width: 90px;
+        height: 280px;
+        right: 12px; 
+    }
+
+    .player-area.player-p3 { 
+        height: 80px;
+        bottom: -5px;
+        max-width: 380px;
+    }
+
+    .player-area.player-p4 { 
+        width: 90px;
+        height: 280px;
+        left: 12px; 
+    }
+
+    .card {
+        width: 35px;
+        height: 48px;
+        font-size: 16px;
+    }
+    
+    .card-back {
+        width: 35px;
+        height: 48px;
+        font-size: 18px;
+    }
+
+    .player-header {
+        font-size: 0.36em;
+    }
+
+    .board {
+        max-height: calc(100vh - 200px);
+        max-width: calc(100vw - 250px);
+        width: min(55vh, 55vw);
+    }
+
+    .card-on-board {
+        font-size: clamp(9px, 1.4vw, 15px);
+    }
+
+    .info-box {
+        font-size: 0.38em;
+        padding: 4px 8px;
+    }
+
+    .ai-thinking {
+        font-size: 0.45em;
+    }
+
+    .restart-btn {
+        padding: 13px 26px;
+        font-size: 0.65em;
     }
 }
 
-.card-back {
-    width: 38px;
-    height: 52px;
-    background: linear-gradient(135deg, #3d5368 0%, #354b5e 100%);
-    border: 2px solid #1a252f;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 20px;
-    color: #7f8c8d;
-    box-shadow: inset 0 -4px 0 rgba(0,0,0,0.3);
-    flex-shrink: 0;
-    z-index: 21;
-}
-
-.card-back::before {
-    content: '?';
-}
-
-.board-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 0;
-    flex: 1;
-    padding-bottom: 0px;
-    z-index: 3;
-}
-
-.board {
-    display: grid;
-    grid-template-columns: repeat(9, 1fr);
-    grid-template-rows: repeat(9, 1fr);
-    gap: 2px;
-    background: var(--pixel-border);
-    padding: 2px;
-    border: 4px solid var(--pixel-border);
-    border-bottom: 6px solid var(--pixel-border);
-    aspect-ratio: 1;
-    max-height: calc(100vh - 220px); 
-    max-width: calc(100vw - 300px);
-    width: min(58vh, 58vw);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-    z-index: 4;
-}
-
-.cell {
-    background: #3d5368;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    cursor: pointer;
-    border: 1px solid #354b5e;
-    aspect-ratio: 1;
-    transition: all 0.1s;
-    position: relative;
-}
-
-.cell:hover {
-    background: #4a6379;
-}
-
-.cell.valid-move {
-    background: #f39c12;
-    box-shadow: 0 0 10px rgba(241,196,15,0.6);
-    animation: pixelPulse 1s infinite;
-}
-
-@keyframes pixelPulse {
-    0%, 100% { 
-        box-shadow: 0 0 10px rgba(241,196,15,0.6);
+/* ===========================
+   RESPONSIVE - MOBILE 
+   =========================== */
+@media (max-width: 768px) {
+    body {
+        overflow-y: auto;
+        overflow-x: hidden;
     }
-    50% { 
-        box-shadow: 0 0 20px rgba(241,196,15,0.9);
+
+    .game-container {
+        height: auto;
+        min-height: 100vh;
+        padding: 10px;
+        border: 4px solid var(--pixel-border);
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+    }
+
+    h1 {
+        font-size: 0.85em;
+        text-shadow: 
+            2px 2px 0 #e74c3c,
+            -1px -1px 0 #3498db;
+    }
+    
+    .info-box {
+        font-size: 0.32em;
+        padding: 3px 6px;
+    }
+
+    .top-bar-container {
+        top: 10px;
+        left: 10px;
+        z-index: 50;
+    }
+    
+    /* Setup screen - Mobile */
+    .setup-screen h2 {
+        font-size: 0.75em;
+        margin-bottom: 15px;
+    }
+
+    .player-config-controls {
+        flex-direction: column; 
+        gap: 18px;
+        margin: 20px 0;
+    }
+    
+    .config-group label {
+        font-size: 0.42em;
+    }
+
+    .value-display {
+        font-size: 0.6em;
+        padding: 8px 12px;
+        min-width: 100px;
+    }
+    
+    .control-btn {
+        width: 30px;
+        height: 30px;
+        font-size: 1em;
+    }
+    
+    .setup-screen p {
+        font-size: 0.4em;
+        line-height: 1.8;
+    }
+
+    /* Layout mobile - flex dengan order */
+    #gameScreen {
+        display: flex;
+        flex-direction: column;
+        height: auto;
+        width: 100%;
+        position: relative;
+        grid-template-areas: unset;
+        grid-template-rows: unset;
+    }
+
+    .game-layout {
+        position: relative;
+        flex-direction: column;
+        padding: 65px 5px 10px 5px;
+        gap: 8px;
+        overflow-y: auto;
+        overflow-x: hidden;
+        width: 100%;
+        height: auto;
+        display: flex;
+    }
+
+    .player-area {
+        position: relative !important;
+        transform: none !important;
+        left: auto !important;
+        right: auto !important;
+        top: auto !important;
+        bottom: auto !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
+        margin: 5px 0 !important;
+    }
+
+    /* Order untuk mobile: Board di tengah, pemain di sekitar */
+    .player-area.player-p1 {
+        order: 2;
+    }
+
+    .player-area.player-p2 {
+        order: 3;
+    }
+
+    .player-area.player-p3 {
+        order: 4;
+    }
+
+    .player-area.player-p4 {
+        order: 5;
+    }
+
+    .board-container {
+        order: 1;
+        width: 100%;
+        padding: 10px 0;
+        flex-shrink: 0;
+        z-index: 3;
+    }
+
+    .player-info {
+        flex-direction: row !important;
+        align-items: center;
+        padding: 8px;
+        min-height: 85px;
+        gap: 8px;
+        z-index: 10;
+        position: relative;
+    }
+
+    .player-header {
+        flex-direction: column !important;
+        text-align: left;
+        align-items: flex-start;
+        font-size: 0.32em;
+        min-width: 85px;
+        margin-bottom: 0;
+        gap: 3px;
+        flex-shrink: 0;
+        z-index: 11;
+    }
+
+    .player-name {
+        font-size: 1em;
+    }
+
+    .cards-left {
+        font-size: 0.85em;
+        padding: 2px 5px;
+        flex-shrink: 0;
+    }
+
+    /* PERBAIKAN UTAMA: Mobile Hand Deck */
+    .hand {
+        flex-direction: row !important;
+        flex-wrap: nowrap;
+        align-items: center;
+        justify-content: flex-start !important;
+        overflow-x: auto !important;
+        overflow-y: visible !important;
+        gap: 4px;
+        padding: 5px 8px;
+        flex: 1;
+        min-height: 65px;
+        display: flex !important;
+        z-index: 20;
+        position: relative;
+        contain: layout;
+    }
+
+    /* Ketika hand kosong (tidak ada kartu), tengahkan */
+    .hand:empty {
+        justify-content: center !important;
+    }
+    
+    /* Pastikan kartu terlihat dan tidak ada margin yang mendorongnya keluar */
+    .hand > * {
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+
+    /* Style scrollbar di mobile */
+    .hand::-webkit-scrollbar {
+        height: 4px;
+    }
+
+    .hand::-webkit-scrollbar-track {
+        background: rgba(0,0,0,0.1);
+        border-radius: 4px;
+    }
+
+    .hand::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,0.4);
+        border-radius: 4px;
+    }
+
+    .hand::-webkit-scrollbar-thumb:hover {
+        background: rgba(255,255,255,0.6);
+    }
+
+    .card {
+        width: 32px;
+        height: 45px;
+        font-size: 14px;
+        flex-shrink: 0;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 21;
+    }
+    
+    .card-back {
+        width: 32px;
+        height: 45px;
+        font-size: 15px;
+        flex-shrink: 0;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 21;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+    }
+
+    .card.selected {
+        transform: translateY(-8px) scale(1.1);
+        z-index: 22;
+    }
+
+    .board {
+        width: min(92vw, 92vw) !important;
+        max-width: 420px !important;
+        max-height: 420px !important;
+        margin: 0 auto;
+        z-index: 4;
+    }
+
+    .cell {
+        min-width: 0;
+        min-height: 0;
+    }
+
+    .card-on-board {
+        font-size: clamp(8px, 2.2vw, 14px);
+    }
+
+    .ai-thinking {
+        font-size: 0.38em;
+        padding: 6px 10px;
+        z-index: 100;
+    }
+
+    .winner-screen h2 {
+        font-size: 0.85em;
+    }
+
+    .winner-info {
+        font-size: 0.45em;
+        line-height: 1.8;
+    }
+
+    .restart-btn {
+        padding: 12px 22px;
+        font-size: 0.5em;
+        gap: 8px;
     }
 }
 
-.card-on-board {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: clamp(10px, 1.5vw, 16px);
-    font-weight: bold;
-    text-shadow: 2px 2px 0 rgba(0,0,0,0.5);
-    box-shadow: inset 0 -3px 0 rgba(0,0,0,0.3);
-    border: 2px solid rgba(0,0,0,0.3);
-    position: relative;
+/* ===========================
+   EXTRA SMALL MOBILE 
+   =========================== */
+@media (max-width: 480px) {
+    .game-container {
+        padding: 8px;
+    }
+
+    h1 {
+        font-size: 0.7em;
+        letter-spacing: 1px;
+    }
+
+    .info-box {
+        font-size: 0.28em;
+    }
+
+    .top-bar-container {
+        top: 8px;
+        left: 8px;
+    }
+
+    .setup-screen h2 {
+        font-size: 0.65em;
+    }
+
+    .value-display {
+        font-size: 0.55em;
+        padding: 7px 10px;
+        min-width: 90px;
+    }
+
+    .control-btn {
+        width: 28px;
+        height: 28px;
+        font-size: 0.95em;
+    }
+
+    .game-layout {
+        padding: 55px 3px 8px 3px;
+        gap: 6px;
+    }
+
+    .player-info {
+        min-height: 80px;
+        padding: 6px;
+    }
+
+    .player-header {
+        font-size: 0.28em;
+        min-width: 75px;
+    }
+
+    .card {
+        width: 28px;
+        height: 40px;
+        font-size: 12px;
+        margin: 0;
+    }
+    
+    .card-back {
+        width: 28px;
+        height: 40px;
+        font-size: 13px;
+        margin: 0;
+    }
+
+    .hand {
+        gap: 3px;
+        padding: 6px 5px;
+        min-height: 60px;
+    }
+
+    .board {
+        width: min(95vw, 95vw) !important;
+        max-width: 360px !important;
+        max-height: 360px !important;
+        gap: 1px;
+    }
+
+    .card-on-board {
+        font-size: clamp(7px, 2vw, 12px);
+    }
+
+    .ai-thinking {
+        font-size: 0.35em;
+        padding: 5px 8px;
+    }
+
+    .winner-screen h2 {
+        font-size: 0.7em;
+    }
+
+    .winner-info {
+        font-size: 0.4em;
+    }
+
+    .restart-btn {
+        padding: 10px 18px;
+        font-size: 0.45em;
+    }
 }
 
-.card-on-board::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: rgba(255,255,255,0.3);
-}
+/* ===========================
+   LANDSCAPE MOBILE FIX
+   =========================== */@media (max-width: 768px) {
 
-.color-red, .card.color-red { 
-    background: linear-gradient(180deg, #e74c3c 0%, #c0392b 100%);
-}
+    /* Player box jadi kolom agar kartu muncul di tengah */
+    .player-info {
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 8px !important;
+        padding: 10px !important;
+        min-height: 120px !important;
+    }
 
-.color-green, .card.color-green { 
-    background: linear-gradient(180deg, #2ecc71 0%, #27ae60 100%);
-}
+    /* Header tetap di atas */
+    .player-header {
+        width: 100% !important;
+        align-items: center !important;
+        text-align: center !important;
+        flex-direction: column !important;
+        margin-bottom: 5px !important;
+    }
 
-.color-blue, .card.color-blue { 
-    background: linear-gradient(180deg, #3498db 0%, #2980b9 100%);
-}
+    /* Hand berada di tengah */
+    .hand {
+        width: 100% !important;
+        justify-content: center !important;
+        align-items: center !important;
+        overflow-x: auto !important;
+        margin-top: 4px !important;
+        z-index: 50 !important;
+    }
 
-.color-yellow, .card.color-yellow { 
-    background: linear-gradient(180deg, #f1c40f 0%, #f39c12 100%);
-    color: #2c3e50;
-    text-shadow: 
-        1px 1px 0 rgba(255,255,255,0.5),
-        -1px -1px 0 rgba(0,0,0,0.3);
+    /* Kartu terlihat */
+    .card, .card-back {
+        z-index: 60 !important;
+        position: relative !important;
+    }
+
+    .modal-content {
+        padding: 20px;
+    }
+    .modal-content h2 {
+        font-size: 0.8em;
+    }
+    .modal-content .winner-info {
+        font-size: 0.45em;
+    }
+    .modal-content .restart-btn {
+        font-size: 0.4em;
+    }
 }
